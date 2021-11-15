@@ -8,9 +8,9 @@ for ((RESULT_NO=$1;RESULT_NO <= $2;RESULT_NO++)) {
         RESULT_NO0=`printf "%02d" $RESULT_NO`
         
         if [ $GENERATE_NO -eq 0 ]; then
-            ZIP_NAME=${RESULT_NO0}
+            ZIP_NAME=${RESULT_NO}
         else
-            ZIP_NAME=${RESULT_NO0}-$GENERATE_NO
+            ZIP_NAME=${RESULT_NO}-$GENERATE_NO
         fi
 
         if [ -f ./data/orig/result${ZIP_NAME}.zip ]; then

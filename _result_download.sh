@@ -10,9 +10,9 @@ RESULT_NO=`printf "%02d" $1`
 GENERATE_NO=$2
 
 if [ $GENERATE_NO -eq 0 ]; then
-    ZIP_NAME=${RESULT_NO0}
+    ZIP_NAME=${RESULT_NO}
 else
-    ZIP_NAME=${RESULT_NO0}-$GENERATE_NO
+    ZIP_NAME=${RESULT_NO}-$GENERATE_NO
 fi
 
 mkdir ./data/orig/result${RESULT_NO}

@@ -36,9 +36,9 @@ if [ $GENERATE_NO -lt 0 ]; then
 fi
 
 if [ $GENERATE_NO -eq 0 ]; then
-    ZIP_NAME=${RESULT_NO0}
+    ZIP_NAME=${RESULT_NO}
 else
-    ZIP_NAME=${RESULT_NO0}-$GENERATE_NO
+    ZIP_NAME=${RESULT_NO}-$GENERATE_NO
 fi
 
 #------------------------------------------------------------------
