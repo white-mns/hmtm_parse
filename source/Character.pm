@@ -13,7 +13,6 @@ use ConstData;
 use HTML::TreeBuilder;
 use source::lib::GetNode;
 
-
 require "./source/lib/IO.pm";
 require "./source/lib/time.pm";
 
@@ -72,10 +71,13 @@ sub Execute{
 
     my $start = 1;
     my $end   = 0;
-    my $directory = './data/orig/result' . $self->{ResultNo0} . '_' . $self->{GenerateNo} . '/k/now';
+    my $directory = './data/orig/result' . $self->{ResultNo0};
+    $directory .= ($self->{GenerateNo} == 0) ? '' :  '-' . $self->{GenerateNo};
+    $directory .= '/result/c';
+
     if (ConstData::EXE_ALLRESULT) {
         #結果全解析
-        $end = GetMaxFileNo($directory,"r");
+        $end = GetMaxFileNo($directory,"");
     }else{
         #指定範囲解析
         $start = ConstData::FLAGMENT_START;
@@ -84,10 +86,10 @@ sub Execute{
 
     print "$start to $end\n";
 
-    for (my $e_no=$start; $e_no<=$end; $e_no++) {
-        if ($e_no % 10 == 0) {print $e_no . "\n"};
+    for (my $p_no=$start; $p_no<=$end; $p_no++) {
+        if ($p_no % 10 == 0) {print $p_no . "\n"};
 
-        $self->ParsePage($directory."/r".$e_no.".html",$e_no);
+        $self->ParsePage($directory."/".$p_no.".html", $p_no);
     }
     
     return ;
@@ -101,7 +103,7 @@ sub Execute{
 sub ParsePage{
     my $self        = shift;
     my $file_name   = shift;
-    my $e_no        = shift;
+    my $p_no        = shift;
 
     #結果の読み込み
     my $content = "";
@@ -113,17 +115,11 @@ sub ParsePage{
     my $tree = HTML::TreeBuilder->new;
     $tree->parse($content);
 
-    my $div_cnm_nodes         = &GetNode::GetNode_Tag_Attr("div", "class", "CNM",     \$tree);
-
-    my $div_cimgnm_nodes      = ["", $$div_cimgnm1_nodes[0], $$div_cimgnm2_nodes[0], $$div_cimgnm3_nodes[0], $$div_cimgnm4_nodes[0]];
-    
-    if(!scalar(@$div_align_right_nodes)) {
-        $tree = $tree->delete;
-        return;
-    };
+    my $pcname_nodes   = &GetNode::GetNode_Tag_Attr("span", "id", "Name2", \$tree);
+    my $plname_nodes   = &GetNode::GetNode_Tag_Attr("span", "id", "PLName", \$tree);
 
     # データリスト取得
-    if (exists($self->{DataHandlers}{Name}))          {$self->{DataHandlers}{Name}->GetData          ($e_no, $$div_cnm_nodes[0], $$div_align_right_nodes[0]};
+    if (exists($self->{DataHandlers}{Name})) {$self->{DataHandlers}{Name}->GetData ($p_no, $$pcname_nodes[0], $$plname_nodes[0])};
 
     $tree = $tree->delete;
 }
