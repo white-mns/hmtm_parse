@@ -16,7 +16,7 @@ fi
 # 再更新番号の指定がない場合、取得済みで最も再更新番号の大きいファイルを探索して実行する
 if [ -z "$2" ]; then
     for ((GENERATE_NO=5;GENERATE_NO >=0;GENERATE_NO--)) {
-        
+
         if [ $GENERATE_NO -eq 0 ]; then
             ZIP_NAME=${RESULT_NO0}
         else
@@ -56,7 +56,7 @@ fi
 if [ -f ./data/orig/result${ZIP_NAME}.zip ]; then
 
     echo "open archive..."
-    
+
     cd ./data/orig
 
     rm  -rf result
@@ -64,11 +64,6 @@ if [ -f ./data/orig/result${ZIP_NAME}.zip ]; then
     rm  -rf result${ZIP_NAME}
 
     unzip -q result${ZIP_NAME}.zip
-    if [ -d result ]; then
-        mv result  result${ZIP_NAME}
-    elif [ -d result${RESULT_NO} ]; then
-        mv result${RESULT_NO}  result${ZIP_NAME}
-    fi
 
     cd ../../
 
@@ -77,7 +72,7 @@ if [ -f ./data/orig/result${ZIP_NAME}.zip ]; then
 
 #------------------------------------------------------------------
 # 展開したファイルを削除
-    
+
     echo "rm archive..."
     cd ./data/orig
     rm  -rf result${ZIP_NAME}
