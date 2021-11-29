@@ -46,7 +46,7 @@ sub Main {
     $result_no = sprintf ("%02d", $result_no);
 
     $upload->DBConnect();
-    
+
     $upload->DeleteSameResult("uploaded_checks", $result_no, $generate_no);
 
     if (ConstData::EXE_DATA) {
@@ -55,7 +55,8 @@ sub Main {
     if (ConstData::EXE_NEW) {
     }
     if (ConstData::EXE_CHARA) {
-        &UploadResult($upload, $result_no, $generate_no, ConstData::EXE_CHARA_NAME, "names", "./output/chara/name_");
+        &UploadResult($upload, $result_no, $generate_no, ConstData::EXE_CHARA_NAME,    "names",    "./output/chara/name_");
+        &UploadResult($upload, $result_no, $generate_no, ConstData::EXE_CHARA_PROFILE, "profiles", "./output/chara/profile_");
     }
     if (ConstData::EXE_BATTLE) {
     }

@@ -17,6 +17,7 @@ require "./source/lib/IO.pm";
 require "./source/lib/time.pm";
 
 require "./source/chara/Name.pm";
+require "./source/chara/Profile.pm";
 
 use ConstData;        #定数呼び出し
 
@@ -49,20 +50,21 @@ sub Init{
     $self->{ResultNo0} = sprintf ("%02d", $self->{ResultNo});
 
     #インスタンス作成
-    if (ConstData::EXE_CHARA_NAME)           { $self->{DataHandlers}{Name}          = Name->new();}
+    if (ConstData::EXE_CHARA_NAME)    { $self->{DataHandlers}{Name}    = Name->new();}
+    if (ConstData::EXE_CHARA_PROFILE) { $self->{DataHandlers}{Profile} = Profile->new();}
 
     #初期化処理
     foreach my $object( values %{ $self->{DataHandlers} } ) {
         $object->Init($self->{ResultNo}, $self->{GenerateNo}, $self->{CommonDatas});
     }
-    
+
     return;
 }
 
 #-----------------------------------#
 #    圧縮結果から詳細データファイルを抽出
 #-----------------------------------#
-#    
+#
 #-----------------------------------#
 sub Execute{
     my $self        = shift;
@@ -91,7 +93,7 @@ sub Execute{
 
         $self->ParsePage($directory."/".$p_no.".html", $p_no);
     }
-    
+
     return ;
 }
 #-----------------------------------#
@@ -115,11 +117,14 @@ sub ParsePage{
     my $tree = HTML::TreeBuilder->new;
     $tree->parse($content);
 
-    my $pcname_nodes   = &GetNode::GetNode_Tag_Attr("span", "id", "Name2", \$tree);
-    my $plname_nodes   = &GetNode::GetNode_Tag_Attr("span", "id", "PLName", \$tree);
+    my $nickname_nodes = &GetNode::GetNode_Tag_Attr("span", "id", "Nickname", \$tree);
+    my $pcname_nodes   = &GetNode::GetNode_Tag_Attr("span", "id", "Name2",    \$tree);
+    my $plname_nodes   = &GetNode::GetNode_Tag_Attr("span", "id", "PLName",   \$tree);
+    my $profile_nodes  = &GetNode::GetNode_Tag_Attr("td",   "class", "Prof",  \$tree);
 
     # データリスト取得
-    if (exists($self->{DataHandlers}{Name})) {$self->{DataHandlers}{Name}->GetData ($p_no, $$pcname_nodes[0], $$plname_nodes[0])};
+    if (exists($self->{DataHandlers}{Name}))    {$self->{DataHandlers}{Name}->GetData    ($p_no, $$pcname_nodes[0],   $$plname_nodes[0])};
+    if (exists($self->{DataHandlers}{Profile})) {$self->{DataHandlers}{Profile}->GetData ($p_no, $$nickname_nodes[0], $$profile_nodes[1])};
 
     $tree = $tree->delete;
 }
