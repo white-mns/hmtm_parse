@@ -18,6 +18,7 @@ require "./source/lib/time.pm";
 
 require "./source/chara/Name.pm";
 require "./source/chara/Profile.pm";
+require "./source/chara/Status.pm";
 
 use ConstData;        #定数呼び出し
 
@@ -52,6 +53,7 @@ sub Init{
     #インスタンス作成
     if (ConstData::EXE_CHARA_NAME)    { $self->{DataHandlers}{Name}    = Name->new();}
     if (ConstData::EXE_CHARA_PROFILE) { $self->{DataHandlers}{Profile} = Profile->new();}
+    if (ConstData::EXE_CHARA_STATUS)  { $self->{DataHandlers}{Status}  = Status->new();}
 
     #初期化処理
     foreach my $object( values %{ $self->{DataHandlers} } ) {
@@ -120,11 +122,13 @@ sub ParsePage{
     my $nickname_nodes = &GetNode::GetNode_Tag_Attr("span", "id", "Nickname", \$tree);
     my $pcname_nodes   = &GetNode::GetNode_Tag_Attr("span", "id", "Name2",    \$tree);
     my $plname_nodes   = &GetNode::GetNode_Tag_Attr("span", "id", "PLName",   \$tree);
-    my $profile_nodes  = &GetNode::GetNode_Tag_Attr("td",   "class", "Prof",  \$tree);
+    my $profile_nodes  = &GetNode::GetNode_Tag_Attr("td", "class", "Prof",   \$tree);
+    my $pcdata_nodes   = &GetNode::GetNode_Tag_Attr("td", "class", "PCData", \$tree);
 
     # データリスト取得
     if (exists($self->{DataHandlers}{Name}))    {$self->{DataHandlers}{Name}->GetData    ($p_no, $$pcname_nodes[0],   $$plname_nodes[0])};
     if (exists($self->{DataHandlers}{Profile})) {$self->{DataHandlers}{Profile}->GetData ($p_no, $$nickname_nodes[0], $$profile_nodes[1])};
+    if (exists($self->{DataHandlers}{Status}))  {$self->{DataHandlers}{Status}->GetData  ($p_no, $$pcdata_nodes[0])};
 
     $tree = $tree->delete;
 }
