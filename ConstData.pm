@@ -25,5 +25,6 @@ use warnings;
         use constant EXE_CHARA_NAME       => 1;
         use constant EXE_CHARA_PROFILE    => 1;
         use constant EXE_CHARA_STATUS     => 1;
+        use constant EXE_CHARA_EQUIP      => 1;
     use constant EXE_BATTLE         => 1;
 1;

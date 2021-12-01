@@ -58,6 +58,7 @@ sub Main {
         &UploadResult($upload, $result_no, $generate_no, ConstData::EXE_CHARA_NAME,    "names",    "./output/chara/name_");
         &UploadResult($upload, $result_no, $generate_no, ConstData::EXE_CHARA_PROFILE, "profiles", "./output/chara/profile_");
         &UploadResult($upload, $result_no, $generate_no, ConstData::EXE_CHARA_STATUS,  "statuses", "./output/chara/status_");
+        &UploadResult($upload, $result_no, $generate_no, ConstData::EXE_CHARA_EQUIP,   "equips",   "./output/chara/equip_");
     }
     if (ConstData::EXE_BATTLE) {
     }
