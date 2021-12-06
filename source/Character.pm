@@ -79,7 +79,7 @@ sub Execute{
     my $end   = 0;
     my $directory = './data/orig/result' . $self->{ResultNo0};
     $directory .= ($self->{GenerateNo} == 0) ? '' :  '-' . $self->{GenerateNo};
-    $directory .= '/result/c';
+    $directory .= '/result/d';
 
     if (ConstData::EXE_ALLRESULT) {
         #結果全解析
