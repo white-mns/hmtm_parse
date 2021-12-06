@@ -112,7 +112,7 @@ sub GetProfileData{
 
     if ($course) {
         my @subject_course = split(' ', $course);
-        $subject_id = $subject_course[0] ne "魔術科" ? 0 : 1;
+        $subject_id = $subject_course[0] eq "魔術科" ? 0 : 1;
         $course_id = $subject_course[1] ? $self->{CommonDatas}{ProperName}->GetOrAddId($subject_course[1]) : 0;
     }
 
