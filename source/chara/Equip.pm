@@ -85,7 +85,7 @@ sub GetEquipData{
     my $self  = shift;
     my $skilldata_nodes = shift;
 
-    my $table_node = &GetHmtmNode::SearchTableNodeFromSkillDataTd($skilldata_nodes, "装備");
+    my $table_node = &GetHmtmNode::SearchTableNodeFromSkillItemDataTd($skilldata_nodes, "装備");
     my $tr_nodes   = &GetNode::GetNode_Tag("tr", \$table_node);
     shift(@$tr_nodes);
 

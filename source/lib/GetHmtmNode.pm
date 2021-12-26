@@ -14,7 +14,7 @@ use source::lib::GetNode;
 #    引数｜TDノード
 #          項目名
 #-----------------------------------#
-sub SearchTableNodeFromSkillDataTd{
+sub SearchTableNodeFromSkillItemDataTd{
     my $td_nodes = shift;
     my $text   = shift;
 
