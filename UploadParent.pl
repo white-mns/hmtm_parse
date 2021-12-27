@@ -62,6 +62,7 @@ sub Main {
         &UploadResult($upload, $result_no, $generate_no, ConstData::EXE_CHARA_STATUS,  "statuses", "./output/chara/status_");
         &UploadResult($upload, $result_no, $generate_no, ConstData::EXE_CHARA_EQUIP,   "equips",   "./output/chara/equip_");
         &UploadResult($upload, $result_no, $generate_no, ConstData::EXE_CHARA_ITEM,    "items",    "./output/chara/item_");
+        &UploadResult($upload, $result_no, $generate_no, ConstData::EXE_CHARA_SPELL,   "spells",   "./output/chara/spell_");
     }
     if (ConstData::EXE_BATTLE) {
     }

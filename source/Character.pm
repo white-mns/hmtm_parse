@@ -21,6 +21,7 @@ require "./source/chara/Profile.pm";
 require "./source/chara/Status.pm";
 require "./source/chara/Equip.pm";
 require "./source/chara/Item.pm";
+require "./source/chara/Spell.pm";
 
 use ConstData;        #定数呼び出し
 
@@ -58,6 +59,7 @@ sub Init{
     if (ConstData::EXE_CHARA_STATUS)  { $self->{DataHandlers}{Status}  = Status->new();}
     if (ConstData::EXE_CHARA_EQUIP)   { $self->{DataHandlers}{Equip}   = Equip->new();}
     if (ConstData::EXE_CHARA_ITEM)    { $self->{DataHandlers}{Item}    = Item->new();}
+    if (ConstData::EXE_CHARA_SPELL)   { $self->{DataHandlers}{Spell}   = Spell->new();}
 
     #初期化処理
     foreach my $object( values %{ $self->{DataHandlers} } ) {
@@ -137,6 +139,7 @@ sub ParsePage{
     if (exists($self->{DataHandlers}{Status}))  {$self->{DataHandlers}{Status}->GetData  ($p_no, $$pcdata_nodes[0])};
     if (exists($self->{DataHandlers}{Equip}))   {$self->{DataHandlers}{Equip}->GetData   ($p_no, $skilldata_nodes)};
     if (exists($self->{DataHandlers}{Item}))    {$self->{DataHandlers}{Item}->GetData    ($p_no, $itemdata_nodes)};
+    if (exists($self->{DataHandlers}{Spell}))   {$self->{DataHandlers}{Spell}->GetData   ($p_no, $skilldata_nodes)};
 
     $tree = $tree->delete;
 }
