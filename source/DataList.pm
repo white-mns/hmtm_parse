@@ -17,6 +17,7 @@ require "./source/lib/IO.pm";
 require "./source/lib/time.pm";
 
 require "./source/list/SpellList.pm";
+require "./source/list/TuneGemList.pm";
 
 use ConstData;        #定数呼び出し
 
@@ -49,7 +50,8 @@ sub Init{
     $self->{ResultNo0} = sprintf ("%02d", $self->{ResultNo});
 
     #インスタンス作成
-    if (ConstData::EXE_DATA_SPELL) { $self->{DataHandlers}{SpellList} = SpellList->new();}
+    if (ConstData::EXE_DATA_SPELL)    { $self->{DataHandlers}{SpellList}   = SpellList->new();}
+    if (ConstData::EXE_DATA_TUNE_GEM) { $self->{DataHandlers}{TuneGemList} = TuneGemList->new();}
 
     #初期化処理
     foreach my $object( values %{ $self->{DataHandlers} } ) {
@@ -73,20 +75,20 @@ sub Execute{
     my $end   = 0;
     my $directory = './data/list';
 
-    if (exists($self->{DataHandlers}{SpellList})) {$self->GetSpellList($directory."/spelllist_".$self->{ResultNo}.".html.gz")};
+    if (exists($self->{DataHandlers}{SpellList}))   {$self->GetSpellList  ($directory."/spelllist_".$self->{ResultNo}.".html.gz")};
+    if (exists($self->{DataHandlers}{TuneGemList})) {$self->GetTuneGemList($directory."/tglist_".$self->{ResultNo}.".html.gz")};
 
     return ;
 }
+
 #-----------------------------------#
-#       ファイルを解析
+#       スペルリストファイルを解析
 #-----------------------------------#
 #    引数｜ファイル名
-#    　　　ENo
 ##-----------------------------------#
 sub GetSpellList{
     my $self        = shift;
     my $file_name   = shift;
-    my $p_no        = shift;
 
     my $tree;
     $tree = $self->ParseContent($file_name, \$tree);
@@ -95,6 +97,26 @@ sub GetSpellList{
 
     # データリスト取得
     $self->{DataHandlers}{SpellList}->GetData($$table_backboard_nodes[0]);
+
+    $tree = $tree->delete;
+}
+
+#-----------------------------------#
+#       TGリストファイルを解析
+#-----------------------------------#
+#    引数｜ファイル名
+##-----------------------------------#
+sub GetTuneGemList{
+    my $self        = shift;
+    my $file_name   = shift;
+
+    my $tree;
+    $tree = $self->ParseContent($file_name, \$tree);
+
+    my $table_backboard_nodes  = &GetNode::GetNode_Tag_Attr("table", "class", "BackBoard", \$tree);
+
+    # データリスト取得
+    $self->{DataHandlers}{TuneGemList}->GetData($$table_backboard_nodes[0]);
 
     $tree = $tree->delete;
 }

@@ -46,10 +46,12 @@ sub Init{
     #インスタンス作成
     $self->{DataHandlers}{ProperName}     = StoreProperName->new();
     $self->{DataHandlers}{SpellData}      = StoreProperData->new();
+    $self->{DataHandlers}{TuneGemData}    = StoreProperData->new();
 
     #他パッケージへの引き渡し用インスタンス
     $self->{CommonDatas}{ProperName}     = $self->{DataHandlers}{ProperName};
     $self->{CommonDatas}{SpellData}      = $self->{DataHandlers}{SpellData};
+    $self->{CommonDatas}{TuneGemData}    = $self->{DataHandlers}{TuneGemData};
 
     my $header_list = "";
     my $output_file = "";
@@ -77,6 +79,17 @@ sub Init{
     ];
     $output_file = "./output/data/". "spell_data" . ".csv";
     $self->{DataHandlers}{SpellData}->Init($header_list, $output_file, [" ", 0, 0, " ", 0, 0, 0, 0, 0]);
+
+    # チューンジェム情報の初期化
+    $header_list = [
+                "tg_id",
+                "name",
+                "sp",
+                "type_id",
+                "text",
+    ];
+    $output_file = "./output/data/". "tune_gem_data" . ".csv";
+    $self->{DataHandlers}{TuneGemData}->Init($header_list, $output_file, [" ", " ", 0, " "]);
 
     return;
 }

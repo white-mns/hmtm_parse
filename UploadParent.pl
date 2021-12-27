@@ -52,6 +52,7 @@ sub Main {
     if (ConstData::EXE_DATA) {
         &UploadData($upload, ConstData::EXE_DATA_PROPER_NAME,     "proper_names",    "./output/data/proper_name.csv");
         &UploadData($upload, ConstData::EXE_DATA_SPELL,           "spell_data",      "./output/data/spell_data.csv");
+        &UploadData($upload, ConstData::EXE_DATA_TUNE_GEM,        "tune_gem_data",   "./output/data/tune_gem_data.csv");
     }
     if (ConstData::EXE_NEW) {
     }
