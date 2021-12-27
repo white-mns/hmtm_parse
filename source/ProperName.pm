@@ -45,9 +45,11 @@ sub Init{
 
     #インスタンス作成
     $self->{DataHandlers}{ProperName}     = StoreProperName->new();
+    $self->{DataHandlers}{SpellData}      = StoreProperData->new();
 
     #他パッケージへの引き渡し用インスタンス
     $self->{CommonDatas}{ProperName}     = $self->{DataHandlers}{ProperName};
+    $self->{CommonDatas}{SpellData}      = $self->{DataHandlers}{SpellData};
 
     my $header_list = "";
     my $output_file = "";
@@ -60,13 +62,29 @@ sub Init{
     $output_file = "./output/data/". "proper_name" . ".csv";
     $self->{DataHandlers}{ProperName}->Init($header_list, $output_file," ");
 
+    # スキル情報の初期化
+    $header_list = [
+                "spell_id",
+                "name",
+                "sp",
+                "element_id",
+                "text",
+                "range",
+                "power",
+                "hit",
+                "timing_id",
+                "class_id",
+    ];
+    $output_file = "./output/data/". "spell_data" . ".csv";
+    $self->{DataHandlers}{SpellData}->Init($header_list, $output_file, [" ", 0, 0, " ", 0, 0, 0, 0, 0]);
+
     return;
 }
 
 #-----------------------------------#
 #   このパッケージでデータ解析はしない
 #-----------------------------------#
-#    
+#
 #-----------------------------------#
 sub Execute{
     my $self        = shift;

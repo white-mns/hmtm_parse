@@ -8,8 +8,10 @@
 require "./source/lib/IO.pm";
 require "./source/lib/time.pm";
 require "./source/ProperName.pm";
-require "./source/Character.pm";
 require "./source/UploadedCheck.pm";
+
+require "./source/Character.pm";
+require "./source/DataList.pm";
 
 # パッケージの使用宣言    ---------------#
 use strict;
@@ -47,10 +49,11 @@ sub Main{
 
     my @objects;        #探索するデータ項目の登録
     my %common_datas;
-    
+
     push(@objects, ProperName->new()); # 固有名詞読み込み・保持
-                               {push(@objects, UploadedCheck->new());} #データ更新状況チェック用データ作成
-    if (ConstData::EXE_CHARA)  {push(@objects, Character->new());}     #キャラページ読み込み
+                              {push(@objects, UploadedCheck->new());} #データ更新状況チェック用データ作成
+    if (ConstData::EXE_DATA)  {push(@objects, DataList->new());}      #データリストページ読み込み
+    if (ConstData::EXE_CHARA) {push(@objects, Character->new());}     #キャラページ読み込み
 
     &Init(\@objects, $result_no, $generate_no, \%common_datas);
     &Execute(\@objects);
@@ -64,7 +67,7 @@ sub Main{
 #-----------------------------------#
 sub Init{
     my ($objects, $result_no, $generate_no, $common_datas)    = @_;
-    
+
     foreach my $object( @$objects) {
         $object->Init($result_no, $generate_no, $common_datas);
     }
@@ -78,7 +81,7 @@ sub Init{
 #-----------------------------------#
 sub Execute{
     my $objects    = shift;
-    
+
     foreach my $object( @$objects) {
         $object->Execute();
     }

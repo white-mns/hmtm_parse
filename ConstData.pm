@@ -21,6 +21,9 @@ use warnings;
         use constant FLAGMENT_START    => 1;    #部分探索開始
         use constant FLAGMENT_END      => 1;    #部分探索終了
 
+    use constant EXE_DATA           => 1;
+        use constant EXE_DATA_SPELL       => 1;
+        use constant EXE_DATA_TUNE_GEM    => 1;
     use constant EXE_CHARA          => 1;
         use constant EXE_CHARA_NAME       => 1;
         use constant EXE_CHARA_PROFILE    => 1;
