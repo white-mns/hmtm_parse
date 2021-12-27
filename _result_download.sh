@@ -8,7 +8,7 @@ cd `dirname $0`	#解析コードのあるディレクトリで作業をする
 
 RESULT_NO=`printf "%02d" $1`
 GENERATE_NO=$2
-MAX_P_NO=940
+MAX_P_NO=975
 
 if [ -z "$2" ]; then
     exit
@@ -25,6 +25,15 @@ mkdir ./data/orig/result${RESULT_NO}/result
 mkdir ./data/orig/result${RESULT_NO}/result/c
 mkdir ./data/orig/result${RESULT_NO}/result/d
 
+cd ./data/list
+
+wget -O shoplist_${RESULT_NO}.html http://www.sssloxia.jp/d/shoplist.aspx
+wget -O spelllist_${RESULT_NO}.html http://www.sssloxia.jp/d/spelllist.aspx
+wget -O tglist_${RESULT_NO}.html http://www.sssloxia.jp/d/tglist.aspx
+
+find . -type f -not -name "*.gz" -not -name "*.sh" | xargs -P 3 -L 50 gzip -9f
+
+cd $CURENT  #元のディレクトリに戻る
 cd ./data/orig/result${RESULT_NO}
 
 wget -O s.css http://www.sssloxia.jp/template.css
