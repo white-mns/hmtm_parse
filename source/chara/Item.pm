@@ -89,9 +89,9 @@ sub GetItemData{
     shift(@$tr_nodes);
     shift(@$tr_nodes);
 
-    my ($i_no, $name, $type_id, $strength, $note) = (0, "", 0, 0, "");
 
     foreach my $tr_node (@$tr_nodes) {
+        my ($i_no, $name, $type_id, $strength, $note) = (0, "", 0, 0, "");
         my @child_nodes = $tr_node->content_list;
 
         if (scalar(@child_nodes) < 5) {next;}

@@ -89,10 +89,10 @@ sub GetEquipData{
     my $tr_nodes   = &GetNode::GetNode_Tag("tr", \$table_node);
     shift(@$tr_nodes);
 
-    my ($equip_no, $name, $range, $states_1, $states_2, $note) = (0, "", 0, 0, 0, "");
     my $equip_no_data = {"武器" => 0, "防具" => 1, "装飾" => 2};
 
     foreach my $tr_node (@$tr_nodes) {
+        my ($equip_no, $name, $range, $states_1, $states_2, $note) = (0, "", 0, 0, 0, "");
         my @child_nodes = $tr_node->content_list;
 
         if (scalar(@child_nodes) < 6) {next;}
