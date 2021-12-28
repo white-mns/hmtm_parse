@@ -8,7 +8,7 @@ cd `dirname $0`	#解析コードのあるディレクトリで作業をする
 
 RESULT_NO=`printf "%02d" $1`
 GENERATE_NO=$2
-MAX_P_NO=975
+MAX_P_NO=990
 
 if [ -z "$2" ]; then
     exit
@@ -49,7 +49,6 @@ for ((P_NO=1; P_NO <= MAX_P_NO; P_NO++)) {
         sleep 5
 
         if grep -q "キャラクターリスト" ./result/d/${P_NO}.html; then
-            WGET_END=1
             rm ./result/d/${P_NO}.html
             break
         fi
@@ -70,16 +69,18 @@ for ((P_NO=1; P_NO <= MAX_P_NO; P_NO++)) {
 
         sleep 5
 
-        if grep -q "キャラクターリスト" ./result/c/${P_NO}.html; then
-            WGET_END=1
-            rm ./result/c/${P_NO}.html
-            break
-        fi
-
         if [ -s ./result/c/${P_NO}.html ]; then
             break
         fi
     }
+}
+
+# 更新結果上は削除されているキャラデータページを削除
+for ((P_NO=1; P_NO <= MAX_P_NO; P_NO++)) {
+    if [ ! -s ./result/c/${P_NO}.html ]; then
+        rm ./result/d/${P_NO}.html
+        break
+    fi
 }
 
 cd $CURENT  #元のディレクトリに戻る
