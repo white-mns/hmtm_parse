@@ -130,9 +130,9 @@ sub GetOrigSpell{
 
     my $tr_orig_skill = $tr_node->right;
 
-    if (!$tr_node) {return 0;}
+    if (!$tr_orig_skill) {return 0;}
 
-    my @child_nodes = $tr_node->content_list;
+    my @child_nodes = $tr_orig_skill->content_list;
 
     my $name = $child_nodes[1]->as_text;
     $name =~ s/┗//;
