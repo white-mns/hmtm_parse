@@ -6,7 +6,8 @@ cd `dirname $0`	#解析コードのあるディレクトリで作業をする
 #------------------------------------------------------------------
 # 更新回数、再更新番号の定義確認、設定
 
-RESULT_NO=`printf "%02d" $1`
+RESULT_NO=`printf "%d" $1`
+RESULT_NO0=`printf "%02d" $1`
 GENERATE_NO=$2
 MAX_P_NO=990
 
@@ -15,26 +16,26 @@ if [ -z "$2" ]; then
 fi
 
 if [ $GENERATE_NO -eq 0 ]; then
-    ZIP_NAME=${RESULT_NO}
+    ZIP_NAME=${RESULT_NO0}
 else
-    ZIP_NAME=${RESULT_NO}-$GENERATE_NO
+    ZIP_NAME=${RESULT_NO0}-$GENERATE_NO
 fi
 
-mkdir ./data/orig/result${RESULT_NO}
-mkdir ./data/orig/result${RESULT_NO}/result
-mkdir ./data/orig/result${RESULT_NO}/result/c
-mkdir ./data/orig/result${RESULT_NO}/result/d
+mkdir ./data/orig/result${RESULT_NO0}
+mkdir ./data/orig/result${RESULT_NO0}/result
+mkdir ./data/orig/result${RESULT_NO0}/result/c
+mkdir ./data/orig/result${RESULT_NO0}/result/d
 
 cd ./data/list
 
-wget -O shoplist_${RESULT_NO}.html http://www.sssloxia.jp/d/shoplist.aspx
-wget -O spelllist_${RESULT_NO}.html http://www.sssloxia.jp/d/spelllist.aspx
-wget -O tglist_${RESULT_NO}.html http://www.sssloxia.jp/d/tglist.aspx
+wget -O shoplist_${RESULT_NO0}.html http://www.sssloxia.jp/d/shoplist.aspx
+wget -O spelllist_${RESULT_NO0}.html http://www.sssloxia.jp/d/spelllist.aspx
+wget -O tglist_${RESULT_NO0}.html http://www.sssloxia.jp/d/tglist.aspx
 
 find . -type f -not -name "*.gz" -not -name "*.sh" | xargs -P 3 -L 50 gzip -9f
 
 cd $CURENT  #元のディレクトリに戻る
-cd ./data/orig/result${RESULT_NO}
+cd ./data/orig/result${RESULT_NO0}
 
 wget -O s.css http://www.sssloxia.jp/template.css
 
@@ -44,7 +45,7 @@ for ((P_NO=1; P_NO <= MAX_P_NO; P_NO++)) {
             break
         fi
 
-        wget -O ./result/d/${P_NO}.html http://www.sssloxia.jp/d/rp2.aspx?PNo=${P_NO}
+        wget -O ./result/d/${P_NO}.html "http://www.sssloxia.jp/d/rp2.aspx?PNo=${P_NO}&Week=${RESULT_NO}"
 
         sleep 5
 
@@ -85,17 +86,17 @@ for ((P_NO=1; P_NO <= MAX_P_NO; P_NO++)) {
 
 cd $CURENT  #元のディレクトリに戻る
 
-find ./data/orig/result${RESULT_NO} -type f -empty -delete
+find ./data/orig/result${RESULT_NO0} -type f -empty -delete
 
 # ファイルを圧縮
-if [ -d ./data/orig/result${RESULT_NO} ]; then
+if [ -d ./data/orig/result${RESULT_NO0} ]; then
 
     cd ./data/orig/
 
     echo "orig zip..."
-    zip -qr result${ZIP_NAME}.zip result${RESULT_NO}
+    zip -qr result${ZIP_NAME}.zip result${RESULT_NO0}
     echo "rm directory..."
-    rm  -r result${RESULT_NO}
+    rm  -r result${RESULT_NO0}
 
     cd ../../
 fi
