@@ -105,6 +105,8 @@ sub GetItemData{
         $strength = $child_nodes[3]->as_text;
         $note = $child_nodes[4]->as_text;
 
+        if (length($note) == 1) {$note = "";}
+
         $self->{Datas}{Data}->AddData(join(ConstData::SPLIT, ($self->{ResultNo}, $self->{GenerateNo}, $self->{ENo}, $i_no, $name, $type_id, $strength, $note) ));
     }
 
