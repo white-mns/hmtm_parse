@@ -21,10 +21,11 @@ else
     ZIP_NAME=${RESULT_NO0}-$GENERATE_NO
 fi
 
-mkdir ./data/orig/result${RESULT_NO0}
-mkdir ./data/orig/result${RESULT_NO0}/result
-mkdir ./data/orig/result${RESULT_NO0}/result/c
-mkdir ./data/orig/result${RESULT_NO0}/result/d
+mkdir ./data/orig/result${ZIP_NAME}
+mkdir ./data/orig/result${ZIP_NAME}/result
+mkdir ./data/orig/result${ZIP_NAME}/result/c
+mkdir ./data/orig/result${ZIP_NAME}/result/d
+mkdir ./data/orig/result${ZIP_NAME}/result/b
 
 cd ./data/list
 
@@ -35,7 +36,7 @@ wget -O tglist_${RESULT_NO0}.html http://www.sssloxia.jp/d/tglist.aspx
 find . -type f -not -name "*.gz" -not -name "*.sh" | xargs -P 3 -L 50 gzip -9f
 
 cd $CURENT  #元のディレクトリに戻る
-cd ./data/orig/result${RESULT_NO0}
+cd ./data/orig/result${ZIP_NAME}
 
 wget -O s.css http://www.sssloxia.jp/template.css
 
@@ -76,6 +77,22 @@ for ((P_NO=1; P_NO <= MAX_P_NO; P_NO++)) {
     }
 }
 
+for ((P_NO=1; P_NO <= MAX_P_NO; P_NO++)) {
+    for ((i=0;i < 2;i++)) { # 2回までリトライする
+        if [ -s ./result/b/${P_NO}.html ]; then
+            break
+        fi
+
+        wget -O ./result/b/${P_NO}.html http://www.sssloxia.jp/result/now/b/${P_NO}.html
+
+        sleep 5
+
+        if [ -s ./result/b/${P_NO}.html ]; then
+            break
+        fi
+    }
+}
+
 # 更新結果上は削除されているキャラデータページを削除
 for ((P_NO=1; P_NO <= MAX_P_NO; P_NO++)) {
     if [ ! -s ./result/c/${P_NO}.html ]; then
@@ -86,17 +103,17 @@ for ((P_NO=1; P_NO <= MAX_P_NO; P_NO++)) {
 
 cd $CURENT  #元のディレクトリに戻る
 
-find ./data/orig/result${RESULT_NO0} -type f -empty -delete
+find ./data/orig/result${ZIP_NAME} -type f -empty -delete
 
 # ファイルを圧縮
-if [ -d ./data/orig/result${RESULT_NO0} ]; then
+if [ -d ./data/orig/result${ZIP_NAME} ]; then
 
     cd ./data/orig/
 
     echo "orig zip..."
-    zip -qr result${ZIP_NAME}.zip result${RESULT_NO0}
+    zip -qr result${ZIP_NAME}.zip result${ZIP_NAME}
     echo "rm directory..."
-    rm  -r result${RESULT_NO0}
+    rm  -r result${ZIP_NAME}
 
     cd ../../
 fi
