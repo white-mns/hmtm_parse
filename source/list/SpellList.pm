@@ -65,7 +65,7 @@ sub GetSpellData{
     my $tr_nodes   = &GetNode::GetNode_Tag("tr", \$table_backboard_node);
     shift(@$tr_nodes);
 
-    my ($spell_name, $sp, $element_id, $text, $range, $power, $hit, $timing_id, $class_id) = ("", 0, 0, "", 0, 0, 0, 0, 0);
+    my ($spell_name, $sp, $element_id, $text, $range, $power, $hit, $gems, $timing_id, $class_id) = ("", 0, 0, "", 0, 0, 0, "", 0, 0);
 
     foreach my $tr_node (@$tr_nodes) {
         my @child_nodes = $tr_node->content_list;
@@ -79,8 +79,9 @@ sub GetSpellData{
         $hit = ($child_nodes[6]->as_text ne "-") ? $child_nodes[6]->as_text : -1;
         $timing_id = $self->{CommonDatas}{ProperName}->GetOrAddId($child_nodes[7]->as_text);
         $class_id = $self->{CommonDatas}{ProperName}->GetOrAddId($child_nodes[8]->as_text);
+        $gems = (scalar(@child_nodes) >= 10 && $child_nodes[9] =~ /HASH/) ? $child_nodes[9]->as_text : "";
 
-        $self->{CommonDatas}{SpellData}->GetOrAddId(1, [$spell_name, $sp, $element_id, $text, $range, $power, $hit, $timing_id, $class_id]);
+        $self->{CommonDatas}{SpellData}->GetOrAddId(1, [$spell_name, $sp, $element_id, $text, $range, $power, $hit, $gems, $timing_id, $class_id]);
     }
 
     return;

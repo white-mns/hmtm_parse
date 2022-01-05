@@ -137,7 +137,7 @@ sub GetOrigSpell{
     my $name = $child_nodes[1]->as_text;
     $name =~ s/┗//;
 
-    return $self->{CommonDatas}{SpellData}->GetOrAddId(0, [$name, -1, 0, "", -1, -1, -1, 0, 0]);
+    return $self->{CommonDatas}{SpellData}->GetOrAddId(0, [$name, -1, 0, "", -1, -1, -1, "", 0, 0]);
 }
 
 #-----------------------------------#
