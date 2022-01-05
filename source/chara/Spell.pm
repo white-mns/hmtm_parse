@@ -154,9 +154,9 @@ sub GetGems{
     my $tr_gem = $tr_node->right->right;
 
     while($tr_gem && $tr_gem =~ /HASH/ && $tr_gem->tag eq "tr"){
-        my @child_nodes = $tr_node->content_list;
+        my @child_nodes = $tr_gem->content_list;
 
-        if(scalar(@child_nodes) == 0 || $child_nodes[1]->as_text ne "") {last;}
+        if(scalar(@child_nodes) == 0 || $child_nodes[0]->as_text ne "") {last;}
 
         my $name = $child_nodes[1]->as_text;
         $name =~ s/┗//;
