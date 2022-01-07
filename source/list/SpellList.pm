@@ -80,6 +80,7 @@ sub GetSpellData{
         $timing_id = $self->{CommonDatas}{ProperName}->GetOrAddId($child_nodes[7]->as_text);
         $class_id = $self->{CommonDatas}{ProperName}->GetOrAddId($child_nodes[8]->as_text);
         $gems = (scalar(@child_nodes) >= 10 && $child_nodes[9] =~ /HASH/) ? $child_nodes[9]->as_text : "";
+        $gems = ($gems) ? ",".$gems : $gems;
 
         $self->{CommonDatas}{SpellData}->GetOrAddId(1, [$spell_name, $sp, $element_id, $text, $range, $power, $hit, $gems, $timing_id, $class_id]);
     }
