@@ -162,10 +162,11 @@ sub GetGems{
         $name =~ s/┗//;
         $name =~ s/　//g;
 
-        $gems = $gems eq "" ? $name : "$gems、$name";
+        $gems = $gems eq "" ? $name : "$gems,$name";
 
         $tr_gem = $tr_gem->right;
     }
+    $gems = ($gems) ? ",".$gems."," : $gems;
 
     return $gems;
 }
