@@ -96,7 +96,7 @@ sub GetSpellList{
     my $table_backboard_nodes  = &GetNode::GetNode_Tag_Attr("table", "class", "BackBoard", \$tree);
 
     # データリスト取得
-    $self->{DataHandlers}{SpellList}->GetData($$table_backboard_nodes[0]);
+    $self->{DataHandlers}{SpellList}->GetData($table_backboard_nodes);
 
     $tree = $tree->delete;
 }

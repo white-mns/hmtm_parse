@@ -46,9 +46,9 @@ sub Init{
 #-----------------------------------#
 sub GetData{
     my $self    = shift;
-    my $table_backboard_node = shift;
+    my $table_backboard_nodes = shift;
 
-    $self->GetSpellData($table_backboard_node);
+    $self->GetSpellData($table_backboard_nodes);
 
     return;
 }
@@ -60,9 +60,9 @@ sub GetData{
 #-----------------------------------#
 sub GetSpellData{
     my $self  = shift;
-    my $table_backboard_node = shift;
+    my $table_backboard_nodes = shift;
 
-    my $tr_nodes   = &GetNode::GetNode_Tag("tr", \$table_backboard_node);
+    my $tr_nodes   = &GetNode::GetNode_Tag("tr", \$$table_backboard_nodes[0]);
     shift(@$tr_nodes);
 
     my ($spell_name, $sp, $element_id, $text, $range, $power, $hit, $gems, $timing_id, $class_id) = ("", 0, 0, "", 0, 0, 0, "", 0, 0);
