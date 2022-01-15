@@ -48,7 +48,12 @@ sub GetData{
     my $self    = shift;
     my $table_backboard_nodes = shift;
 
-    $self->GetSpellData($table_backboard_nodes);
+    if ($self->{ResultNo} >= 2) {
+        $self->GetSpellData($table_backboard_nodes);
+
+    } else {
+        $self->GetSpellData_0_1($table_backboard_nodes);
+    }
 
     return;
 }
@@ -59,10 +64,58 @@ sub GetData{
 #    引数｜スペルデータノード
 #-----------------------------------#
 sub GetSpellData{
-    my $self  = shift;
+    my $self = shift;
+    my $table_backboard_nodes = shift;
+    my $text = "";
+
+    foreach my $table_node (@$table_backboard_nodes) {
+        my $tr_nodes = &GetNode::GetNode_Tag("tr", \$table_node);
+
+        foreach my $tr_node (@$tr_nodes) {
+            my ($spell_name, $sp, $element_id, $range, $power, $hit, $gems, $timing_id, $class_id) = ("", 0, 0, 0, 0, 0, "", 0, 0);
+
+            my @child_nodes = $tr_node->content_list;
+
+            $spell_name = $child_nodes[0]->as_text;
+            $sp = $child_nodes[1]->as_text;
+
+            if ($sp eq "SP") { # 行の内容が項目の説明のとき、新しい魔法の種類に移ったと判定して説明データを初期化する
+                $text = "";
+                next;
+            }
+
+            $element_id = $self->{CommonDatas}{ProperName}->GetOrAddId($child_nodes[2]->as_text);
+            $range = ($child_nodes[3]->as_text ne "-") ? $child_nodes[3]->as_text : -1;
+            $power = $child_nodes[4]->as_text;
+            $hit = ($child_nodes[5]->as_text ne "-") ? $child_nodes[5]->as_text : -1;
+            $timing_id = $self->{CommonDatas}{ProperName}->GetOrAddId($child_nodes[6]->as_text);
+            $class_id = $self->{CommonDatas}{ProperName}->GetOrAddId($child_nodes[7]->as_text);
+
+            if ($text eq "") { # 保持している説明データが空のときは公式スペルと判定して説明を保存する
+                $text = $child_nodes[8]->as_text;
+
+            } else { # 説明情報が保存されているなら説明欄をTG情報として扱う
+                $gems = $child_nodes[8]->as_text;
+                $gems = ($gems) ? ",".$gems : $gems;
+            }
+
+            $self->{CommonDatas}{SpellData}->GetOrAddId(1, [$spell_name, $sp, $element_id, $text, $range, $power, $hit, $gems, $timing_id, $class_id]);
+        }
+    }
+
+    return;
+}
+
+#-----------------------------------#
+#    スペルデータ取得
+#------------------------------------
+#    引数｜スペルデータノード
+#-----------------------------------#
+sub GetSpellData_0_1{
+    my $self = shift;
     my $table_backboard_nodes = shift;
 
-    my $tr_nodes   = &GetNode::GetNode_Tag("tr", \$$table_backboard_nodes[0]);
+    my $tr_nodes = &GetNode::GetNode_Tag("tr", \$$table_backboard_nodes[0]);
     shift(@$tr_nodes);
 
     my ($spell_name, $sp, $element_id, $text, $range, $power, $hit, $gems, $timing_id, $class_id) = ("", 0, 0, "", 0, 0, 0, "", 0, 0);
