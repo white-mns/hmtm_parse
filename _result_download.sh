@@ -9,7 +9,7 @@ cd `dirname $0`	#解析コードのあるディレクトリで作業をする
 RESULT_NO=`printf "%d" $1`
 RESULT_NO0=`printf "%02d" $1`
 GENERATE_NO=$2
-MAX_P_NO=990
+MAX_P_NO=1100
 
 if [ -z "$2" ]; then
     exit

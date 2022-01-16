@@ -44,7 +44,8 @@ fi
 #------------------------------------------------------------------
 # 圧縮結果をダウンロード。なければ各個アクセスするシェルスクリプトを実行
 if [ ! -f ./data/orig/result${ZIP_NAME}.zip ]; then
-    wget -O data/orig/result${ZIP_NAME}.zip http://lisge.com/ib/k/result${RESULT_NO}.zip
+    :
+    #wget -O data/orig/result${ZIP_NAME}.zip http://lisge.com/ib/k/result${RESULT_NO}.zip
 fi
 
 if [ ! -f ./data/orig/result${ZIP_NAME}.zip ] || [ ! -s ./data/orig/result${ZIP_NAME}.zip ]; then
@@ -68,14 +69,14 @@ if [ -f ./data/orig/result${ZIP_NAME}.zip ]; then
     cd ../../
 
     perl ./GetData.pl      $RESULT_NO $GENERATE_NO
-    perl ./UploadParent.pl $RESULT_NO $GENERATE_NO
+    #perl ./UploadParent.pl $RESULT_NO $GENERATE_NO
 
 #------------------------------------------------------------------
 # 展開したファイルを削除
 
     echo "rm archive..."
     cd ./data/orig
-    rm  -rf result${ZIP_NAME}
+    #rm  -rf result${ZIP_NAME}
     cd ../../
 
 fi
