@@ -99,9 +99,11 @@ sub GetSpellData{
         my @child_nodes = $tr_node->content_list;
 
         $s_no = $child_nodes[0]->as_text;
-        $name = $child_nodes[1]->as_text;
 
-        if($s_no eq ""){next;}
+        my @child1_child_nodes = $child_nodes[1]->content_list;
+        $name = ($child1_child_nodes[0] =~ /HASH/) ? $child1_child_nodes[0]->as_text : $name;
+
+        if ($s_no eq "") {next;}
         if (!$name) {next;}
 
         $sp         = $child_nodes[2]->as_text;
