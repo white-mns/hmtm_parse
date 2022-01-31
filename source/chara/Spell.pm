@@ -8,8 +8,12 @@
 # パッケージの使用宣言    ---------------#
 use strict;
 use warnings;
+
 require "./source/lib/Store_Data.pm";
 require "./source/lib/Store_HashData.pm";
+
+require "./source/data/Obsolescence.pm";
+
 use ConstData;        #定数呼び出し
 use source::lib::GetNode;
 
@@ -66,6 +70,11 @@ sub Init{
     ];
 
     $self->{Datas}{Data}->Init($header_list);
+
+    if (ConstData::EXE_DATA_OBSOLESCENCE) {
+        $self->{Datas}{Obsolescence}   = Obsolescence->new();
+        $self->{Datas}{Obsolescence}->Init($self->{ResultNo}, $self->{GenerateNo}, $self->{CommonDatas});
+    }
 
     #出力ファイル設定
     $self->{Datas}{Data}->SetOutputName( "./output/chara/spell_" . $self->{ResultNo} . "_" . $self->{GenerateNo} . ".csv" );
@@ -141,6 +150,8 @@ sub GetSpellData{
         $gems = $self->GetGems($tr_node);
 
         $self->{Datas}{Data}->AddData(join(ConstData::SPLIT, ($self->{ResultNo}, $self->{GenerateNo}, $self->{ENo}, $s_no, $name, $sp, $power, $hit, $range, $timing_id, $gems, $element_id, $obsolescence, $spell_id) ));
+
+        if (exists($self->{Datas}{Obsolescence})) {$self->{Datas}{Obsolescence}->SetObsolescenceData($obsolescence, $gems)};
     }
 
     return;
@@ -185,11 +196,11 @@ sub GetGems{
 
         if(scalar(@child_nodes) == 0 || $child_nodes[0]->as_text ne "") {last;}
 
-        my $name = $child_nodes[1]->as_text;
-        $name =~ s/┗//;
-        $name =~ s/　//g;
+        my $tg_name = $child_nodes[1]->as_text;
+        $tg_name =~ s/┗//;
+        $tg_name =~ s/　//g;
 
-        $gems = $gems eq "" ? $name : "$gems,$name";
+        $gems = ($gems eq "") ? $tg_name : "$gems,$tg_name";
 
         $tr_gem = $tr_gem->right;
     }

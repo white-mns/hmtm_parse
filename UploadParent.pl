@@ -50,19 +50,21 @@ sub Main {
     $upload->DeleteSameResult("uploaded_checks", $result_no, $generate_no);
 
     if (ConstData::EXE_DATA) {
-        &UploadData($upload, ConstData::EXE_DATA_PROPER_NAME,     "proper_names",    "./output/data/proper_name.csv");
-        &UploadData($upload, ConstData::EXE_DATA_SPELL,           "spell_data",      "./output/data/spell_data.csv");
-        &UploadData($upload, ConstData::EXE_DATA_TUNE_GEM,        "tune_gem_data",   "./output/data/tune_gem_data.csv");
+        &UploadData($upload, ConstData::EXE_DATA_PROPER_NAME, "proper_names",      "./output/data/proper_name.csv");
+        &UploadData($upload, ConstData::EXE_DATA_SPELL,       "spell_data",        "./output/data/spell_data.csv");
+        &UploadData($upload, ConstData::EXE_DATA_TUNE_GEM,    "tune_gem_data",     "./output/data/tune_gem_data.csv");
+
+        &UploadResult($upload, $result_no, $generate_no, ConstData::EXE_DATA_OBSOLESCENCE, "obsolescences", "./output/data/obsolescence_");
     }
     if (ConstData::EXE_NEW) {
     }
     if (ConstData::EXE_CHARA) {
-        &UploadResult($upload, $result_no, $generate_no, ConstData::EXE_CHARA_NAME,    "names",    "./output/chara/name_");
-        &UploadResult($upload, $result_no, $generate_no, ConstData::EXE_CHARA_PROFILE, "profiles", "./output/chara/profile_");
-        &UploadResult($upload, $result_no, $generate_no, ConstData::EXE_CHARA_STATUS,  "statuses", "./output/chara/status_");
-        &UploadResult($upload, $result_no, $generate_no, ConstData::EXE_CHARA_EQUIP,   "equips",   "./output/chara/equip_");
-        &UploadResult($upload, $result_no, $generate_no, ConstData::EXE_CHARA_ITEM,    "items",    "./output/chara/item_");
-        &UploadResult($upload, $result_no, $generate_no, ConstData::EXE_CHARA_SPELL,   "spells",   "./output/chara/spell_");
+        &UploadResult($upload, $result_no, $generate_no, ConstData::EXE_CHARA_NAME,         "names",         "./output/chara/name_");
+        &UploadResult($upload, $result_no, $generate_no, ConstData::EXE_CHARA_PROFILE,      "profiles",      "./output/chara/profile_");
+        &UploadResult($upload, $result_no, $generate_no, ConstData::EXE_CHARA_STATUS,       "statuses",      "./output/chara/status_");
+        &UploadResult($upload, $result_no, $generate_no, ConstData::EXE_CHARA_EQUIP,        "equips",        "./output/chara/equip_");
+        &UploadResult($upload, $result_no, $generate_no, ConstData::EXE_CHARA_ITEM,         "items",         "./output/chara/item_");
+        &UploadResult($upload, $result_no, $generate_no, ConstData::EXE_CHARA_SPELL,        "spells",        "./output/chara/spell_");
     }
     if (ConstData::EXE_BATTLE) {
     }
