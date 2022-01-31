@@ -1,4 +1,36 @@
 #!/bin/bash
+function WGET_STATIC_PAGE() {
+    MAX_P_NO=$1
+    PREFIX=$2
+    MAX_FAILED=$3
+
+    FAILED=0
+    for ((P_NO=1; P_NO <= MAX_P_NO; P_NO++)) {
+        if [ $((FAILED)) -eq  $((MAX_FAILED)) ]; then # 指定回数以上失敗した場合、出力ページの最後に辿り着いたと判定して取得処理を終了する
+            break
+        fi
+
+        for ((i=0;i < 2;i++)) { # 2回までリトライする
+            if [ -s ./result/${PREFIX}/${P_NO}.html ]; then
+                FAILED=0
+                break
+            fi
+
+            wget -O ./result/${PREFIX}/${P_NO}.html http://www.sssloxia.jp/result/now/${PREFIX}/${P_NO}.html
+
+            sleep 2
+
+            if [ -s ./result/${PREFIX}/${P_NO}.html ]; then
+                FAILED=0
+                break
+            fi
+        }
+
+        if [ ! -s /result/${PREFIX}/${P_NO}.html ]; then
+            FAILED=$(( FAILED + 1 ))
+        fi
+    }
+}
 
 CURENT=`pwd`	#実行ディレクトリの保存
 cd `dirname $0`	#解析コードのあるディレクトリで作業をする
@@ -26,6 +58,9 @@ mkdir ./data/orig/result${ZIP_NAME}/result
 mkdir ./data/orig/result${ZIP_NAME}/result/c
 mkdir ./data/orig/result${ZIP_NAME}/result/d
 mkdir ./data/orig/result${ZIP_NAME}/result/b
+mkdir ./data/orig/result${ZIP_NAME}/result/pk
+mkdir ./data/orig/result${ZIP_NAME}/result/prc
+mkdir ./data/orig/result${ZIP_NAME}/result/rank
 
 cd ./data/list
 
@@ -38,7 +73,7 @@ find . -type f -not -name "*.gz" -not -name "*.sh" | xargs -P 3 -L 50 gzip -9f
 cd $CURENT  #元のディレクトリに戻る
 cd ./data/orig/result${ZIP_NAME}
 
-wget -O s.css http://www.sssloxia.jp/template.css
+wget -O template.css http://www.sssloxia.jp/template.css
 
 for ((P_NO=1; P_NO <= MAX_P_NO; P_NO++)) {
     for ((i=0;i < 2;i++)) { # 2回までリトライする
@@ -50,7 +85,7 @@ for ((P_NO=1; P_NO <= MAX_P_NO; P_NO++)) {
 
         sleep 5
 
-        if grep -q "キャラクターリスト" ./result/d/${P_NO}.html; then
+        if grep -q -e "キャラクターリスト" -e "backcircle2.png" ./result/d/${P_NO}.html; then
             rm ./result/d/${P_NO}.html
             break
         fi
@@ -61,37 +96,11 @@ for ((P_NO=1; P_NO <= MAX_P_NO; P_NO++)) {
     }
 }
 
-for ((P_NO=1; P_NO <= MAX_P_NO; P_NO++)) {
-    for ((i=0;i < 2;i++)) { # 2回までリトライする
-        if [ -s ./result/c/${P_NO}.html ]; then
-            break
-        fi
-
-        wget -O ./result/c/${P_NO}.html http://www.sssloxia.jp/result/now/c/${P_NO}.html
-
-        sleep 5
-
-        if [ -s ./result/c/${P_NO}.html ]; then
-            break
-        fi
-    }
-}
-
-for ((P_NO=1; P_NO <= MAX_P_NO; P_NO++)) {
-    for ((i=0;i < 2;i++)) { # 2回までリトライする
-        if [ -s ./result/b/${P_NO}.html ]; then
-            break
-        fi
-
-        wget -O ./result/b/${P_NO}.html http://www.sssloxia.jp/result/now/b/${P_NO}.html
-
-        sleep 5
-
-        if [ -s ./result/b/${P_NO}.html ]; then
-            break
-        fi
-    }
-}
+WGET_STATIC_PAGE $MAX_P_NO c 100
+WGET_STATIC_PAGE $MAX_P_NO b 100
+WGET_STATIC_PAGE $MAX_P_NO pk 50
+WGET_STATIC_PAGE $MAX_P_NO rank 100
+WGET_STATIC_PAGE $MAX_P_NO prc 50
 
 # 更新結果上は削除されているキャラデータページを削除
 for ((P_NO=1; P_NO <= MAX_P_NO; P_NO++)) {
