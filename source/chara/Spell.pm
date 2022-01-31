@@ -35,6 +35,14 @@ sub new {
 sub Init{
     my $self = shift;
     ($self->{ResultNo}, $self->{GenerateNo}, $self->{CommonDatas}) = @_;
+    $self->{ElementColors} = {"#FFFFFF"=>$self->{CommonDatas}{ProperName}->GetOrAddId("無"),
+                              "#E37F81"=>$self->{CommonDatas}{ProperName}->GetOrAddId("火"),
+                              "#9FA2EE"=>$self->{CommonDatas}{ProperName}->GetOrAddId("水"),
+                              "#9FEEB5"=>$self->{CommonDatas}{ProperName}->GetOrAddId("風"),
+                              "#EEBD9F"=>$self->{CommonDatas}{ProperName}->GetOrAddId("地"),
+                              "#FED969"=>$self->{CommonDatas}{ProperName}->GetOrAddId("光"),
+                              "#AF80E7"=>$self->{CommonDatas}{ProperName}->GetOrAddId("闇"),
+                             };
 
     #初期化
     $self->{Datas}{Data} = StoreData->new();
@@ -52,6 +60,8 @@ sub Init{
                 "range",
                 "timing_id",
                 "gems",
+                "element_id",
+                "obsolescence",
                 "spell_id",
     ];
 
@@ -95,7 +105,7 @@ sub GetSpellData{
     shift(@$tr_nodes);
 
     foreach my $tr_node (@$tr_nodes) {
-        my ($s_no, $name, $sp, $power, $hit, $range, $timing_id, $spell_id, $gems) = (0, "", 0, 0, 0, 0, 0, 0, "");
+        my ($s_no, $name, $sp, $power, $hit, $range, $timing_id, $spell_id, $gems, $element_id, $obsolescence) = (0, "", 0, 0, 0, 0, 0, 0, "", 0, 0);
         my @child_nodes = $tr_node->content_list;
 
         $s_no = $child_nodes[0]->as_text;
@@ -112,10 +122,25 @@ sub GetSpellData{
         $range      = ($child_nodes[5]->as_text ne "-") ? $child_nodes[5]->as_text : -1;
         $timing_id  = $self->{CommonDatas}{ProperName}->GetOrAddId($child_nodes[6]->as_text);
 
+        $obsolescence  = ($child1_child_nodes[2] =~ /HASH/) ? $child1_child_nodes[2]->as_text : 0;
+        $obsolescence  = ($obsolescence) ? $obsolescence : 0;
+        $obsolescence =~ s/▲//g;
+        $obsolescence =~ s/▼/-/g;
+        $obsolescence =~ s/%//g;
+
+        $element_id = $self->{CommonDatas}{ProperName}->GetOrAddId("無");
+
+        if ($child1_child_nodes[0] =~ /HASH/) {
+            my @child1_child0_child_nodes = $child1_child_nodes[0]->content_list;
+            my $element_color  = ($child1_child0_child_nodes[0] =~ /HASH/) ? $child1_child0_child_nodes[0]->attr("color") : "";
+
+            $element_id = (exists($self->{ElementColors}{$element_color})) ? $self->{ElementColors}{$element_color} : $element_id;
+        }
+
         $spell_id = $self->GetOrigSpell($tr_node);
         $gems = $self->GetGems($tr_node);
 
-        $self->{Datas}{Data}->AddData(join(ConstData::SPLIT, ($self->{ResultNo}, $self->{GenerateNo}, $self->{ENo}, $s_no, $name, $sp, $power, $hit, $range, $timing_id, $gems, $spell_id) ));
+        $self->{Datas}{Data}->AddData(join(ConstData::SPLIT, ($self->{ResultNo}, $self->{GenerateNo}, $self->{ENo}, $s_no, $name, $sp, $power, $hit, $range, $timing_id, $gems, $element_id, $obsolescence, $spell_id) ));
     }
 
     return;
