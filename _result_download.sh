@@ -104,7 +104,7 @@ WGET_STATIC_PAGE $MAX_P_NO prc 50
 
 # 更新結果上は削除されているキャラデータページを削除
 for ((P_NO=1; P_NO <= MAX_P_NO; P_NO++)) {
-    if [ ! -s ./result/c/${P_NO}.html ]; then
+    if [ ! -s ./result/c/${P_NO}.html ] && [ -s ./result/d/${P_NO}.html ]; then
         rm ./result/d/${P_NO}.html
         break
     fi
