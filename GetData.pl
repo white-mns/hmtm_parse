@@ -11,6 +11,7 @@ require "./source/ProperName.pm";
 require "./source/UploadedCheck.pm";
 
 require "./source/Character.pm";
+require "./source/Action.pm";
 require "./source/DataList.pm";
 
 # パッケージの使用宣言    ---------------#
@@ -51,9 +52,10 @@ sub Main{
     my %common_datas;
 
     push(@objects, ProperName->new()); # 固有名詞読み込み・保持
-                              {push(@objects, UploadedCheck->new());} #データ更新状況チェック用データ作成
-    if (ConstData::EXE_DATA)  {push(@objects, DataList->new());}      #データリストページ読み込み
-    if (ConstData::EXE_CHARA) {push(@objects, Character->new());}     #キャラページ読み込み
+                               {push(@objects, UploadedCheck->new());} #データ更新状況チェック用データ作成
+    if (ConstData::EXE_DATA)   {push(@objects, DataList->new());}      #データリストページ読み込み
+    if (ConstData::EXE_CHARA)  {push(@objects, Character->new());}     #キャラステータスページ読み込み
+    if (ConstData::EXE_ACTION) {push(@objects, Action->new());}        #キャラ結果ページ読み込み
 
     &Init(\@objects, $result_no, $generate_no, \%common_datas);
     &Execute(\@objects);

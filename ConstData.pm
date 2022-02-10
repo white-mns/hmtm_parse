@@ -22,15 +22,17 @@ use warnings;
         use constant FLAGMENT_END      => 1;    #部分探索終了
 
     use constant EXE_DATA           => 1;
-        use constant EXE_DATA_SPELL        => 1;
-        use constant EXE_DATA_TUNE_GEM     => 1;
-        use constant EXE_DATA_OBSOLESCENCE => 1;
+        use constant EXE_DATA_SPELL            => 1;
+        use constant EXE_DATA_TUNE_GEM         => 1;
+        use constant EXE_DATA_OBSOLESCENCE     => 1;
     use constant EXE_CHARA          => 1;
-        use constant EXE_CHARA_NAME        => 1;
-        use constant EXE_CHARA_PROFILE     => 1;
-        use constant EXE_CHARA_STATUS      => 1;
-        use constant EXE_CHARA_EQUIP       => 1;
-        use constant EXE_CHARA_ITEM        => 1;
-        use constant EXE_CHARA_SPELL       => 1;
+        use constant EXE_CHARA_NAME            => 1;
+        use constant EXE_CHARA_PROFILE         => 1;
+        use constant EXE_CHARA_STATUS          => 1;
+        use constant EXE_CHARA_EQUIP           => 1;
+        use constant EXE_CHARA_ITEM            => 1;
+        use constant EXE_CHARA_SPELL           => 1;
+    use constant EXE_ACTION         => 1;
+        use constant EXE_ACTION_TUNING_ABILITY => 1;
     use constant EXE_BATTLE         => 1;
 1;

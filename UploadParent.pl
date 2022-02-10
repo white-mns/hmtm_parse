@@ -66,6 +66,9 @@ sub Main {
         &UploadResult($upload, $result_no, $generate_no, ConstData::EXE_CHARA_ITEM,         "items",         "./output/chara/item_");
         &UploadResult($upload, $result_no, $generate_no, ConstData::EXE_CHARA_SPELL,        "spells",        "./output/chara/spell_");
     }
+    if (ConstData::EXE_ACTION) {
+        &UploadResult($upload, $result_no, $generate_no, ConstData::EXE_ACTION_TUNING_ABILITY, "tuning_abilities",         "./output/action/tuning_ability_");
+    }
     if (ConstData::EXE_BATTLE) {
     }
         &UploadResult($upload, $result_no, $generate_no, 1, "uploaded_checks", "./output/etc/uploaded_check_");
