@@ -175,6 +175,11 @@ sub GetOrigSpell{
     my $name = $child_nodes[1]->as_text;
     $name =~ s/┗//;
 
+    if ($name =~ /\N{NBSP}/) { # 熟練度データを分離
+        my @name_proficiency =split(/\N{NBSP}/, $name);
+        $name = $name_proficiency[0];
+    }
+
     return $self->{CommonDatas}{SpellData}->GetOrAddId(0, [$name, -1, 0, "", -1, -1, -1, "", 0, 0]);
 }
 
