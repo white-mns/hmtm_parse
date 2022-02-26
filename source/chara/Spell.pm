@@ -178,7 +178,16 @@ sub GetOrigSpell{
 
     if ($name =~ /\N{NBSP}/) { # 熟練度データを分離
         my @name_proficiency =split(/\N{NBSP}/, $name);
-        $name = $name_proficiency[0];
+        $name = shift(@name_proficiency);
+
+        my $proficiency_index = 1;
+        foreach my $name_split (@name_proficiency) {
+            # スペル名の途中に空白と等しくなるバイトを含むマルチバイト文字がある場合にスペル名を再結合し、熟練度の格納されたインデックス番号を取得
+            if ($name_split !~ /熟：/) {
+                $name .=  "\N{NBSP}" . $name_split;
+                $proficiency_index += 1;
+            }
+        }
     }
 
     my $text = $child_nodes[2]->as_text;
