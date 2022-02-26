@@ -198,7 +198,7 @@ sub GetOrigSpell{
     $class_text =~ s/防御補助/防補/;
     my $class_id = $self->{CommonDatas}{ProperName}->GetOrAddId($class_text);
 
-    return $self->{CommonDatas}{SpellData}->GetOrAddId(0, [$name, $$ability_hash{"sp"}, $$ability_hash{"element_id"}, $text, $$ability_hash{"range"}, $$ability_hash{"power"}, $$ability_hash{"hit"}, $$ability_hash{"gems"}, $$ability_hash{"timing_id"}, $class_id]);
+    return $self->{CommonDatas}{SpellData}->GetOrAddId(0, [$name, $$ability_hash{"sp"}, $$ability_hash{"element_id"}, $text, $$ability_hash{"range"}, $$ability_hash{"power"}, $$ability_hash{"hit"}, $$ability_hash{"gems"}, $$ability_hash{"timing_id"}, $class_id, 0]);
 }
 
 #-----------------------------------#

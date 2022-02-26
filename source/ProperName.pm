@@ -77,9 +77,10 @@ sub Init{
                 "gems",
                 "timing_id",
                 "class_id",
+                "base_spell_id",
     ];
     $output_file = "./output/data/". "spell_data" . ".csv";
-    $self->{DataHandlers}{SpellData}->Init($header_list, $output_file, [" ", 0, 0, " ", 0, 0, 0, " ", 0, 0]);
+    $self->{DataHandlers}{SpellData}->Init($header_list, $output_file, [" ", 0, 0, " ", 0, 0, 0, " ", 0, 0, 0]);
 
     # チューンジェム情報の初期化
     $header_list = [

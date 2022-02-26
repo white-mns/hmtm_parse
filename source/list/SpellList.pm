@@ -67,6 +67,7 @@ sub GetSpellData{
     my $self = shift;
     my $table_backboard_nodes = shift;
     my $text = "";
+    my $base_spell_id = 0;
 
     foreach my $table_node (@$table_backboard_nodes) {
         my $tr_nodes = &GetNode::GetNode_Tag("tr", \$table_node);
@@ -79,8 +80,9 @@ sub GetSpellData{
             $spell_name = $child_nodes[0]->as_text;
             $sp = $child_nodes[1]->as_text;
 
-            if ($sp eq "SP") { # 行の内容が項目の説明のとき、新しい魔法の種類に移ったと判定して説明データを初期化する
+            if ($sp eq "SP") { # 行の内容が項目の説明のとき、新しい魔法の種類に移ったと判定して説明データと派生元スペルIDを初期化する
                 $text = "";
+                $base_spell_id = 0;
                 next;
             }
 
@@ -99,7 +101,13 @@ sub GetSpellData{
                 $gems = ($gems) ? ",".$gems : $gems;
             }
 
-            $self->{CommonDatas}{SpellData}->GetOrAddId(1, [$spell_name, $sp, $element_id, $text, $range, $power, $hit, $gems, $timing_id, $class_id]);
+            my $spell_id = $self->{CommonDatas}{SpellData}->GetOrAddId(1, [$spell_name, $sp, $element_id, $text, $range, $power, $hit, $gems, $timing_id, $class_id, $base_spell_id]);
+
+            if ($base_spell_id == 0) {
+                # 派生元の基本スペルの場合、自身を派生元スペルとして再登録
+                $base_spell_id = $spell_id;
+                $spell_id = $self->{CommonDatas}{SpellData}->GetOrAddId(1, [$spell_name, $sp, $element_id, $text, $range, $power, $hit, $gems, $timing_id, $class_id, $base_spell_id]);
+            }
         }
     }
 
