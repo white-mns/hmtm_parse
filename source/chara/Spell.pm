@@ -146,8 +146,8 @@ sub GetSpellData{
             $element_id = (exists($self->{ElementColors}{$element_color})) ? $self->{ElementColors}{$element_color} : $element_id;
         }
 
-        $spell_id = $self->GetOrigSpell($tr_node);
         $gems = $self->GetGems($tr_node);
+        $spell_id = $self->GetOrigSpell($tr_node, {"sp"=>$sp, "element_id"=>$element_id, "range"=>$range,"power"=>$power, "hit"=>$hit, "gems"=>$gems, "timing_id"=>$timing_id});
 
         $self->{Datas}{Data}->AddData(join(ConstData::SPLIT, ($self->{ResultNo}, $self->{GenerateNo}, $self->{ENo}, $s_no, $name, $sp, $power, $hit, $range, $timing_id, $gems, $element_id, $obsolescence, $spell_id) ));
 
@@ -165,6 +165,7 @@ sub GetSpellData{
 sub GetOrigSpell{
     my $self  = shift;
     my $tr_node = shift;
+    my $ability_hash = shift;
 
     my $tr_orig_skill = $tr_node->right;
 
@@ -180,7 +181,15 @@ sub GetOrigSpell{
         $name = $name_proficiency[0];
     }
 
-    return $self->{CommonDatas}{SpellData}->GetOrAddId(0, [$name, -1, 0, "", -1, -1, -1, "", 0, 0]);
+    my $text = $child_nodes[2]->as_text;
+
+    my $class_text = $child_nodes[3]->as_text;
+    $class_text =~ s/魔法//;
+    $class_text =~ s/攻撃補助/攻補/;
+    $class_text =~ s/防御補助/防補/;
+    my $class_id = $self->{CommonDatas}{ProperName}->GetOrAddId($class_text);
+
+    return $self->{CommonDatas}{SpellData}->GetOrAddId(0, [$name, $$ability_hash{"sp"}, $$ability_hash{"element_id"}, $text, $$ability_hash{"range"}, $$ability_hash{"power"}, $$ability_hash{"hit"}, $$ability_hash{"gems"}, $$ability_hash{"timing_id"}, $class_id]);
 }
 
 #-----------------------------------#
