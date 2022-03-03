@@ -67,7 +67,9 @@ sub Main {
         &UploadResult($upload, $result_no, $generate_no, ConstData::EXE_CHARA_SPELL,        "spells",        "./output/chara/spell_");
     }
     if (ConstData::EXE_ACTION) {
-        &UploadResult($upload, $result_no, $generate_no, ConstData::EXE_ACTION_TUNING_ABILITY, "tuning_abilities",         "./output/action/tuning_ability_");
+        &UploadResult($upload, $result_no, $generate_no, ConstData::EXE_ACTION_TUNING_ABILITY, "tuning_abilities", "./output/action/tuning_ability_");
+        &UploadResult($upload, $result_no, $generate_no, ConstData::EXE_ACTION_PARTY_INFO,     "party_infos",      "./output/action/party_info_");
+        &UploadResult($upload, $result_no, $generate_no, ConstData::EXE_ACTION_PARTY,          "parties",          "./output/action/party_");
     }
     if (ConstData::EXE_BATTLE) {
     }

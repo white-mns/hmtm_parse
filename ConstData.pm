@@ -34,5 +34,6 @@ use warnings;
         use constant EXE_CHARA_SPELL           => 1;
     use constant EXE_ACTION         => 1;
         use constant EXE_ACTION_TUNING_ABILITY => 1;
+        use constant EXE_ACTION_PARTY          => 1;
     use constant EXE_BATTLE         => 1;
 1;
