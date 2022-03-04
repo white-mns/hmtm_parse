@@ -180,10 +180,34 @@ sub GetSpellData{
 
     foreach my $child_node (@child_nodes) {
         my $child_depth = $start_depth;
-        if ($child_node =~ /HASH/ && $child_node->attr("name") && $child_node->attr("name") eq "TGDL") { # カウンター発動時のネスト構造を再帰探査
+        if ($child_node =~ /HASH/ && $child_node->attr("name") && $child_node->attr("name") eq "TGDL") {
             my @tgdl_child_nodes = $child_node->content_list;
 
             foreach my $tgdl_child_node (@tgdl_child_nodes) {
+                # 発動TGを記述
+                if ($tgdl_child_node =~ /HASH/ && $tgdl_child_node->tag eq "span" && $tgdl_child_node->attr("style") && $tgdl_child_node->attr("style") eq "Color:WHITE"
+                                                                    && $tgdl_child_node->attr("class") && $tgdl_child_node->attr("class") eq "F1") {
+
+                    my $tg_depth_text = "";
+                    for (my $i=0;$i<$depth;$i++) {
+                        $tg_depth_text .= "<"
+                    }
+
+                    my $tg_text = $tgdl_child_node->as_text;
+                    $tg_text =~ s/ //;
+                    my @tgs = split("！", $tg_text);
+
+                    foreach my $tg (@tgs) {
+                        if (length($tg) <= 1) {next;}
+
+                        $self->{ThreadTg}     .= $tg_depth_text ."," . $tg ."," . "|";
+                        $self->{ThreadOrigTg} .= $tg_depth_text ."," . $tg ."," . "|";
+                        #$self->{ThreadBaseTg} .= $tg_depth_text ."," . $tg ."," . "|";
+
+                    }
+                }
+
+                #カウンター発動時のネスト構造を再帰探査
                 if ($tgdl_child_node =~ /HASH/ && $tgdl_child_node->attr("name") && $tgdl_child_node->attr("name") eq "SSDL") {
                     $child_depth = $self->GetSpellData($start_depth, $tgdl_child_node);
                 }
