@@ -122,7 +122,7 @@ sub GetThreadData{
         my $depth = 0;
 
         if ($child_node =~ /HASH/ && $child_node->attr("name") && $child_node->attr("name") eq "SSDL") {
-            $depth = $self->GetSpellData($depth, $child_node);
+            $depth = $self->GetSpellData(1, $depth, $child_node);
 
             $self->OutputThreadMember();
             $self->{Datas}{Thread}->AddData(join(ConstData::SPLIT, ($self->{ResultNo}, $self->{GenerateNo}, $self->{BattleType}, $self->{BattleNo}, $self->{Turn}, $self->{ThreadId},
@@ -146,19 +146,21 @@ sub GetThreadData{
 #-----------------------------------#
 sub GetSpellData{
     my $self = shift;
+    my $is_SSDL = shift;
     my $depth = shift;
     my $div_SSDL_node = shift;
 
-    my $div_spell_nodes   = &GetNode::GetNode_Tag_Attr_RegExp("div", "spell", ".", \$div_SSDL_node);
+    my $div_normalspell_nodes = &GetNode::GetNode_Tag_Attr_RegExp("div", "spell", ".", \$div_SSDL_node);
+    my $div_syncspell_nodes   = &GetNode::GetNode_Tag_Attr_RegExp("div", "syncspell", ".", \$div_SSDL_node);
 
-    if (!$$div_spell_nodes[0] || $$div_spell_nodes[0] !~ /HASH/) {return $depth;}
+    my $div_spell_node = ($$div_normalspell_nodes[0] && $$div_normalspell_nodes[0] =~ /HASH/) ? $$div_normalspell_nodes[0] : $$div_syncspell_nodes[0];
 
-    {
-        my @spell_child_nodes = $$div_spell_nodes[0]->content_list;
+    if ($is_SSDL && $div_spell_node && $div_spell_node =~ /HASH/) {
+        my @spell_child_nodes = $div_spell_node->content_list;
 
         my ($spell_name, $orig_spell_name, $base_spell_name, $depth_text) = ("", "", "", "");
         if (scalar(@spell_child_nodes) <= 1) {
-            if ($$div_spell_nodes[0]->attr("spell") eq "通常攻撃") {
+            if ($div_spell_node->attr("spell") && $div_spell_node->attr("spell") eq "通常攻撃") {
                 $spell_name = "通常攻撃";
                 $orig_spell_name = $spell_name;
                 $base_spell_name = $spell_name;
@@ -182,7 +184,7 @@ sub GetSpellData{
             $depth_text .= ">"
         }
 
-        $self->AddThreadMember($$div_spell_nodes[0]);
+        $self->AddThreadMember($div_spell_node);
 
         $self->{Thread}       .= $depth_text ."," . $spell_name      ."," . "|";
         $self->{ThreadTg}     .= $depth_text ."," . $spell_name      ."," . "|";
@@ -208,7 +210,7 @@ sub GetSpellData{
                                                                     && $tgdl_child_node->attr("class") && $tgdl_child_node->attr("class") eq "F1") {
 
                     my $tg_depth_text = "";
-                    for (my $i=0;$i<$depth;$i++) {
+                    for (my $i=0;$i<$start_depth;$i++) {
                         $tg_depth_text .= "<"
                     }
 
@@ -225,16 +227,14 @@ sub GetSpellData{
 
                     }
                 }
-
-                #カウンター発動時のネスト構造を再帰探査
-                if ($tgdl_child_node =~ /HASH/ && $tgdl_child_node->attr("name") && $tgdl_child_node->attr("name") eq "SSDL") {
-                    $child_depth = $self->GetSpellData($start_depth, $tgdl_child_node);
-                }
             }
         }
 
         if ($child_node =~ /HASH/ && $child_node->attr("name") && $child_node->attr("name") eq "SSDL") {
-            $child_depth = $self->GetSpellData($start_depth, $child_node);
+            $child_depth = $self->GetSpellData(1, $start_depth, $child_node);
+        }
+        if ($child_node =~ /HASH/ && $child_node->attr("name") && $child_node->attr("name") eq "TGDL") {
+            $child_depth = $self->GetSpellData(0, $start_depth, $child_node);
         }
         $depth = ($child_depth > $depth) ? $child_depth : $depth;
 
