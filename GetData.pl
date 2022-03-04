@@ -12,6 +12,7 @@ require "./source/UploadedCheck.pm";
 
 require "./source/Character.pm";
 require "./source/Action.pm";
+require "./source/Battle.pm";
 require "./source/DataList.pm";
 
 # パッケージの使用宣言    ---------------#
@@ -56,6 +57,7 @@ sub Main{
     if (ConstData::EXE_DATA)   {push(@objects, DataList->new());}      #データリストページ読み込み
     if (ConstData::EXE_CHARA)  {push(@objects, Character->new());}     #キャラステータスページ読み込み
     if (ConstData::EXE_ACTION) {push(@objects, Action->new());}        #キャラ結果ページ読み込み
+    if (ConstData::EXE_BATTLE) {push(@objects, Battle->new());}        #戦闘結果ページ読み込み
 
     &Init(\@objects, $result_no, $generate_no, \%common_datas);
     &Execute(\@objects);

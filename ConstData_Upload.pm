@@ -34,6 +34,7 @@ use warnings;
         use constant EXE_ACTION_PARTY           => 1;
         use constant EXE_ACTION_PARTY_INFO      => 1;
     use constant EXE_BATTLE               => 1;
+        use constant EXE_BATTLE_THREAD          => 1;
     use constant EXE_NEW                  => 1;
 
 1;
