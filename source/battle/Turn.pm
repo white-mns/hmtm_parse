@@ -83,7 +83,6 @@ sub ParseTurnNodes{
 
     if (!$nodes) {return;}
 
-
     foreach my $node (@$nodes) {
         if ($node->as_text =~ /ターン(\d+?)/) {
             my $turn = $1;

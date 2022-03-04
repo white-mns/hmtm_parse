@@ -37,7 +37,8 @@ sub Init{
     ($self->{ResultNo}, $self->{GenerateNo}, $self->{CommonDatas}) = @_;
 
     #初期化
-    $self->{Datas}{Data} = StoreData->new();
+    $self->{Datas}{Thread} = StoreData->new();
+    $self->{Datas}{ThreadMember} = StoreData->new();
     my $header_list = "";
 
     $header_list = [
@@ -57,10 +58,24 @@ sub Init{
                 "length",
     ];
 
-    $self->{Datas}{Data}->Init($header_list);
+    $self->{Datas}{Thread}->Init($header_list);
+
+    $header_list = [
+                "result_no",
+                "generate_no",
+                "battle_type",
+                "battle_no",
+                "turn",
+                "thread_id",
+                "p_no",
+                "name",
+    ];
+
+    $self->{Datas}{ThreadMember}->Init($header_list);
 
     #出力ファイル設定
-    $self->{Datas}{Data}->SetOutputName( "./output/battle/thread_" . $self->{ResultNo} . "_" . $self->{GenerateNo} . ".csv" );
+    $self->{Datas}{Thread}->SetOutputName      ( "./output/battle/thread_"        . $self->{ResultNo} . "_" . $self->{GenerateNo} . ".csv" );
+    $self->{Datas}{ThreadMember}->SetOutputName( "./output/battle/thread_member_" . $self->{ResultNo} . "_" . $self->{GenerateNo} . ".csv" );
     return;
 }
 
@@ -103,12 +118,14 @@ sub GetThreadData{
         $self->{ThreadBase} = "";
         $self->{ThreadBaseTg} = "";
         $self->{ThreadLength} = 0;
+        $self->{ThreadMember} = {};
         my $depth = 0;
 
         if ($child_node =~ /HASH/ && $child_node->attr("name") && $child_node->attr("name") eq "SSDL") {
             $depth = $self->GetSpellData($depth, $child_node);
 
-            $self->{Datas}{Data}->AddData(join(ConstData::SPLIT, ($self->{ResultNo}, $self->{GenerateNo}, $self->{BattleType}, $self->{BattleNo}, $self->{Turn}, $self->{ThreadId},
+            $self->OutputThreadMember();
+            $self->{Datas}{Thread}->AddData(join(ConstData::SPLIT, ($self->{ResultNo}, $self->{GenerateNo}, $self->{BattleType}, $self->{BattleNo}, $self->{Turn}, $self->{ThreadId},
                                                                 $self->{Thread}, $self->{ThreadTg},
                                                                 $self->{ThreadOrig}, $self->{ThreadOrigTg},
                                                                 $self->{ThreadBase}, $self->{ThreadBaseTg},
@@ -123,7 +140,7 @@ sub GetThreadData{
 }
 
 #-----------------------------------#
-#    スレッド内スペル捜査
+#    スレッド内スペル再帰捜査
 #------------------------------------
 #    引数｜スペル発動ノード
 #-----------------------------------#
@@ -164,6 +181,8 @@ sub GetSpellData{
         for (my $i=0;$i<$depth;$i++) {
             $depth_text .= ">"
         }
+
+        $self->AddThreadMember($$div_spell_nodes[0]);
 
         $self->{Thread}       .= $depth_text ."," . $spell_name      ."," . "|";
         $self->{ThreadTg}     .= $depth_text ."," . $spell_name      ."," . "|";
@@ -225,6 +244,37 @@ sub GetSpellData{
 }
 
 #-----------------------------------#
+#    対抗発動スレッド参加者追加
+#------------------------------------
+#    引数｜
+#-----------------------------------#
+sub AddThreadMember{
+    my $self = shift;
+    my $div_spell_node = shift;
+
+    my $name = $div_spell_node->attr("name");
+    my $pno = $div_spell_node->attr("pno");
+
+    $self->{ThreadMember}{$name} = $pno;
+}
+
+#-----------------------------------#
+#    対抗発動スレッド参加者を出力データに追加
+#------------------------------------
+#    引数｜
+#-----------------------------------#
+sub OutputThreadMember{
+    my $self = shift;
+
+    foreach my $name( keys %{ $self->{ThreadMember} } ) {
+        my $p_no = $self->{ThreadMember}{$name};
+        $self->{Datas}{ThreadMember}->AddData(join(ConstData::SPLIT, ($self->{ResultNo}, $self->{GenerateNo}, $self->{BattleType}, $self->{BattleNo}, $self->{Turn}, $self->{ThreadId},
+                                                            $p_no, $name,
+                                                            ) ));
+    }
+}
+
+#-----------------------------------#
 #    戦闘開始時・行動番号をリセット
 #------------------------------------
 #    引数｜
@@ -238,9 +288,6 @@ sub BattleStart{
     $self->{ActId} = 0;
     $self->{NicknameToEno}  = {};
     $self->{NicknameToEnemyId} = {};
-
-    #$self->{Datas}{Damage}->BattleStart($self->{BattleId});
-    #$self->{Datas}{UseSkillConcatenation}->BattleStart($self->{BattleId});
 }
 
 #-----------------------------------#

@@ -72,7 +72,8 @@ sub Main {
         &UploadResult($upload, $result_no, $generate_no, ConstData::EXE_ACTION_PARTY,          "parties",          "./output/action/party_");
     }
     if (ConstData::EXE_BATTLE) {
-        &UploadResult($upload, $result_no, $generate_no, ConstData::EXE_BATTLE_THREAD, "spell_threads", "./output/battle/thread_");
+        &UploadResult($upload, $result_no, $generate_no, ConstData::EXE_BATTLE_THREAD,        "spell_threads", "./output/battle/thread_");
+        &UploadResult($upload, $result_no, $generate_no, ConstData::EXE_BATTLE_THREAD_MEMBER, "spell_thread_members", "./output/battle/thread_member_");
     }
         &UploadResult($upload, $result_no, $generate_no, 1, "uploaded_checks", "./output/etc/uploaded_check_");
     print "result_no:$result_no,generate_no:$generate_no\n";
