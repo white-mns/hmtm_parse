@@ -18,6 +18,7 @@ require "./source/lib/time.pm";
 
 require "./source/action/TuningAbility.pm";
 require "./source/action/Party.pm";
+require "./source/action/TeachSpell.pm";
 
 use ConstData;        #定数呼び出し
 
@@ -52,6 +53,7 @@ sub Init{
     #インスタンス作成
     if (ConstData::EXE_ACTION_TUNING_ABILITY) {$self->{DataHandlers}{TuningAbility} = TuningAbility->new();}
     if (ConstData::EXE_ACTION_PARTY)          {$self->{DataHandlers}{Party}         = Party->new();}
+    if (ConstData::EXE_ACTION_TEACH_SPELL)    {$self->{DataHandlers}{TeachSpell}    = TeachSpell->new();}
 
     #初期化処理
     foreach my $object( values %{ $self->{DataHandlers} } ) {
@@ -120,11 +122,13 @@ sub ParsePage{
     my $div_alter_skill_nodes = &GetNode::GetNode_Tag_Attr("div", "name", "AlterSkill", \$tree);
     my $div_alter_spell_nodes = &GetNode::GetNode_Tag_Attr("div", "name", "AlterSpell", \$tree);
     my $th_subtitle_nodes     = &GetNode::GetNode_Tag_Attr("th", "class", "SubTitle", \$tree);
+    my $div_teach_spell_nodes = &GetNode::GetNode_Tag_Attr("div", "name", "TeachSpell", \$tree);
     push (@$div_alter_spell_nodes, @$div_alter_skill_nodes);
 
     # データリスト取得
     if (exists($self->{DataHandlers}{TuningAbility})) {$self->{DataHandlers}{TuningAbility}->GetData($p_no, $div_alter_spell_nodes)};
     if (exists($self->{DataHandlers}{Party}))         {$self->{DataHandlers}{Party}->        GetData($p_no, $th_subtitle_nodes)};
+    if (exists($self->{DataHandlers}{TeachSpell}))    {$self->{DataHandlers}{TeachSpell}->   GetData($p_no, $div_teach_spell_nodes)};
 
     $tree = $tree->delete;
 }
