@@ -66,6 +66,7 @@ sub Init{
                 "gems",
                 "element_id",
                 "obsolescence",
+                "tuned_text",
                 "spell_id",
     ];
 
@@ -114,7 +115,7 @@ sub GetSpellData{
     shift(@$tr_nodes);
 
     foreach my $tr_node (@$tr_nodes) {
-        my ($s_no, $name, $sp, $power, $hit, $range, $timing_id, $spell_id, $gems, $element_id, $obsolescence) = (0, "", 0, 0, 0, 0, 0, 0, "", 0, 0);
+        my ($s_no, $name, $sp, $power, $hit, $range, $timing_id, $spell_id, $gems, $element_id, $obsolescence, $tuned_text) = (0, "", 0, 0, 0, 0, 0, 0, "", 0, 0, "");
         my @child_nodes = $tr_node->content_list;
 
         $s_no = $child_nodes[0]->as_text;
@@ -148,8 +149,9 @@ sub GetSpellData{
 
         $gems = $self->GetGems($tr_node);
         $spell_id = $self->GetOrigSpell($tr_node, {"sp"=>$sp, "element_id"=>$element_id, "range"=>$range,"power"=>$power, "hit"=>$hit, "gems"=>$gems, "timing_id"=>$timing_id});
+        $tuned_text = $self->GetTunedText($tr_node);
 
-        $self->{Datas}{Data}->AddData(join(ConstData::SPLIT, ($self->{ResultNo}, $self->{GenerateNo}, $self->{ENo}, $s_no, $name, $sp, $power, $hit, $range, $timing_id, $gems, $element_id, $obsolescence, $spell_id) ));
+        $self->{Datas}{Data}->AddData(join(ConstData::SPLIT, ($self->{ResultNo}, $self->{GenerateNo}, $self->{ENo}, $s_no, $name, $sp, $power, $hit, $range, $timing_id, $gems, $element_id, $obsolescence, $tuned_text, $spell_id) ));
 
         if (exists($self->{Datas}{Obsolescence})) {$self->{Datas}{Obsolescence}->SetObsolescenceData($obsolescence, $gems)};
     }
@@ -199,6 +201,25 @@ sub GetOrigSpell{
     my $class_id = $self->{CommonDatas}{ProperName}->GetOrAddId($class_text);
 
     return $self->{CommonDatas}{SpellData}->GetOrAddId(0, [$name, $$ability_hash{"sp"}, $$ability_hash{"element_id"}, $text, $$ability_hash{"range"}, $$ability_hash{"power"}, $$ability_hash{"hit"}, $$ability_hash{"gems"}, $$ability_hash{"timing_id"}, $class_id, 0]);
+}
+
+#-----------------------------------#
+#    調律後スペル説明データ取得
+#------------------------------------
+#    引数｜スペルtrノード
+#-----------------------------------#
+sub GetTunedText{
+    my $self  = shift;
+    my $tr_node = shift;
+    my $ability_hash = shift;
+
+    my $tr_orig_skill = $tr_node->right;
+
+    if (!$tr_orig_skill) {return 0;}
+
+    my @child_nodes = $tr_orig_skill->content_list;
+
+    return $child_nodes[2]->as_text;
 }
 
 #-----------------------------------#
