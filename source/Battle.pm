@@ -134,6 +134,8 @@ sub ParsePage{
 
     if (!$content) { return;}
 
+    $content = &NumCode::EncodeEscape($content);
+
     #スクレイピング準備
     my $tree = HTML::TreeBuilder->new;
     $tree->parse($content);

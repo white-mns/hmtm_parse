@@ -15,6 +15,7 @@ use source::lib::GetNode;
 
 require "./source/lib/IO.pm";
 require "./source/lib/time.pm";
+require "./source/lib/NumCode.pm";
 
 require "./source/action/TuningAbility.pm";
 require "./source/action/Party.pm";
@@ -114,6 +115,8 @@ sub ParsePage{
     $content = &IO::FileRead($file_name);
 
     if (!$content) { return;}
+
+    $content = &NumCode::EncodeEscape($content);
 
     #スクレイピング準備
     my $tree = HTML::TreeBuilder->new;
