@@ -7,7 +7,7 @@
 # モジュール呼び出し    ---------------#
 require "./source/lib/IO.pm";
 
-# パッケージの定義    ---------------#    
+# パッケージの定義    ---------------#
 package Upload;
 use strict;
 use warnings;
@@ -30,7 +30,7 @@ use ConstData_Upload;  #定数呼び出し
 #-----------------------------------#
 sub new {
     my $class = shift;
-  
+
     bless {
         DBI   => "",
     }, $class;
@@ -42,27 +42,27 @@ sub Upload {
     my $self      = shift;
     my $file_name = shift;
     my $for_table = shift;
-    
+
     print "Uproad to \"$for_table\"...\n";
     #読み込んだファイル内容の展開
     if(&IO::Check($file_name)){
-        
+
         $self->{FileData} = &IO::FileRead ($file_name);
         my @file_data = split(/\n/, $self->{FileData});
-        
+
         my $data_head = shift(@file_data);
         $data_head =~ s/\r\n/\n/g;
         $data_head =~ s/\r/\n/g;
         chomp($data_head);
         my @data_head    = split(ConstData::SPLIT , $data_head );#先頭情報の除去
-        
+
         my @data_que        = ();
-        
+
         foreach my $lineData(@file_data){
-        
+
             #行ごとのデータを展開
             my @one_file_data = split(ConstData::SPLIT, $lineData);
-            
+
             #データ追加
             if (scalar(@one_file_data)){
                 &AddArray($self, \@data_que, \@one_file_data, \@data_head, $for_table);
@@ -76,12 +76,12 @@ sub Upload {
                     print $one_file_data[0] . "\n";
                 }
                 @data_que =();
-            }            
+            }
         }
 
         &InsertDB($self,\@data_que,$for_table);
     }
-    
+
 
     return;
 }
@@ -91,11 +91,11 @@ sub AddArray {
     my $data_que  = shift;
     my $add_data  = shift;
     my $data_head = shift;
-    
+
     my $queData = {};
-    
+
     my $max_data_size = scalar(@$data_head);
-    
+
     foreach    (my $i="0";$i < $max_data_size;$i++){
         $$queData{$$data_head[$i]} = $$add_data[$i];
     }
@@ -107,7 +107,7 @@ sub GetMinimum{
     my $self   = shift;
     my $num_a  = shift;
     my $num_b  = shift;
-    
+
     if($num_a < $num_b){
         return $num_a;
     }else{
@@ -127,7 +127,7 @@ sub InsertDB{
     my $table_name  = shift;
 
     if (!scalar(@$insert_data)) {return;}
-    
+
     $self->{DBI}->insert($insert_data, table     => $table_name, bulk_insert => 1);
 
     if ( $@ ){
@@ -139,7 +139,7 @@ sub InsertDB{
             die $errMes;
         }
     }
-    
+
     return;
 }
 
@@ -151,7 +151,7 @@ sub InsertDB{
 sub DeleteAll{
     my $self       = shift;
     my $table_name = shift;
-    
+
     $self->{DBI}->delete_all( table => $table_name );
     return;
 }
@@ -167,7 +167,7 @@ sub DeleteSameDate{
     my $date       = shift;
 
     print  $date . "\n";
-    
+
     $self->{DBI}->delete(
         table => $table_name,
         where => {created_at => $date,}
@@ -185,7 +185,7 @@ sub DeleteSameResult{
     my $table_name  = shift;
     my $result_no   = shift;
     my $generate_no = shift;
-    
+
     $self->{DBI}->delete(
             table => $table_name,
             where => {result_no   => $result_no,}
@@ -201,15 +201,15 @@ sub DeleteSameResult{
 #-----------------------------------#
 sub DBConnect {
     my $self = shift;
-    
+
     # Connect
     $self->{DBI} = DBIx::Custom->connect(
         dsn      => DbSetting::DSN,
         user     => DbSetting::USER,
         password => DbSetting::PASS,
-        option   => {mysql_enable_utf8 => 1},
+        option   => {mysql_enable_utf8mb4 => 1},
     ) or die "cannot connect to MySQL: $self->{DBI}::errstr";
-    
+
     return;
 }
 1;
