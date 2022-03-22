@@ -35,6 +35,8 @@ sub new {
 sub Init{
     my $self = shift;
     ($self->{ResultNo}, $self->{GenerateNo}, $self->{CommonDatas}) = @_;
+    ($self->{PreviousResultNo}) = ($self->{ResultNo} - 1);
+    $self->{PreviousResultNo} = sprintf ("%02d", $self->{PreviousResultNo});
 
     #初期化
     $self->{Datas}{Party}     = StoreData->new();
@@ -70,7 +72,41 @@ sub Init{
     #出力ファイル設定
     $self->{Datas}{Party}->SetOutputName    ( "./output/action/party_"       . $self->{ResultNo} . "_" . $self->{GenerateNo} . ".csv" );
     $self->{Datas}{PartyInfo}->SetOutputName( "./output/action/party_info_"  . $self->{ResultNo} . "_" . $self->{GenerateNo} . ".csv" );
+
+    $self->ReadPreviousPkType();
+
     return;
+}
+
+#-----------------------------------#
+#    既存データを読み込む
+#-----------------------------------#
+sub ReadPreviousPkType(){
+    my $self      = shift;
+
+    my $file_name = "";
+    # 前回結果の確定版ファイルを探索
+    for (my $i=10; $i>=0; $i--){
+        $file_name = "./output/action/party_info_" . ($self->{PreviousResultNo}) . "_" . $i . ".csv" ;
+
+        if(-f $file_name) {last;}
+    }
+
+    #既存データの読み込み
+    my $content = &IO::FileRead ( $file_name );
+
+    my @file_data = split(/\n/, $content);
+    shift (@file_data);
+
+    foreach my  $data_set(@file_data){
+        my @party_info_data   = split(ConstData::SPLIT, $data_set);
+
+        if ($party_info_data[2] != 13) {next;}
+
+        $self->{PreviousPK}{$party_info_data[3]} = $party_info_data[8];
+    }
+
+    return 0;
 }
 
 #-----------------------------------#
@@ -144,9 +180,6 @@ sub GetPartyData{
 
     my $tr_nodes = &GetNode::GetNode_Tag("tr", \$matching_table_node);
 
-    my $parent_node = $matching_table_node->parent->parent;
-    my $pk_text_font_nodes = &GetNode::GetNode_Tag_Attr("font", "color", "red", \$parent_node);
-
     my $party_name_tr_node = shift(@$tr_nodes);
     my $party_top_td_nodes = &GetNode::GetNode_Tag("td", \$$tr_nodes[0]);
 
@@ -155,6 +188,9 @@ sub GetPartyData{
     }
 
     if ($self->{ENo} == $party_no) { # パーティの戦闘のキャラクター結果からのみパーティ情報を取得する
+        my $parent_node = $matching_table_node->parent->parent;
+        my $pk_text_font_nodes = &GetNode::GetNode_Tag_Attr("font", "color", "red", \$parent_node);
+
         $self->GetPartyInfoData($$pk_text_font_nodes[0], $party_name_tr_node, $tr_nodes, $party_type);
     }
 
@@ -204,6 +240,10 @@ sub GetPartyInfoData{
         if    ($pk_text eq "風　紀　委　員　の　襲　撃") { $pk_type = 1;}
         elsif ($pk_text eq "不　良　を　発　見")         { $pk_type = 2;}
         elsif ($pk_text eq "風　紀　委　員　を　発　見") { $pk_type = 3;}
+    }
+
+    if ($party_type == 3 && exists($self->{PreviousPK}{$self->{ENo}})) { # 前回予告時の不良・風紀情報を引き継ぎ
+        $pk_type = $self->{PreviousPK}{$self->{ENo}};
     }
 
     $self->{Datas}{PartyInfo}->AddData(join(ConstData::SPLIT, ($self->{ResultNo}, $self->{GenerateNo}, $party_type, $self->{ENo}, $name, $member_num, $attacker_num, $supporter_num, $pk_type) ));
