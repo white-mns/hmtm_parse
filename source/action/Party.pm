@@ -62,6 +62,7 @@ sub Init{
         "member_num",
         "attacker_num",
         "supporter_num",
+        "pk_type",
     ];
 
     $self->{Datas}{PartyInfo}->Init($header_list);
@@ -143,6 +144,9 @@ sub GetPartyData{
 
     my $tr_nodes = &GetNode::GetNode_Tag("tr", \$matching_table_node);
 
+    my $parent_node = $matching_table_node->parent->parent;
+    my $pk_text_font_nodes = &GetNode::GetNode_Tag_Attr("font", "color", "red", \$parent_node);
+
     my $party_name_tr_node = shift(@$tr_nodes);
     my $party_top_td_nodes = &GetNode::GetNode_Tag("td", \$$tr_nodes[0]);
 
@@ -151,7 +155,7 @@ sub GetPartyData{
     }
 
     if ($self->{ENo} == $party_no) { # パーティの戦闘のキャラクター結果からのみパーティ情報を取得する
-        $self->GetPartyInfoData($party_name_tr_node, $tr_nodes, $party_type);
+        $self->GetPartyInfoData($$pk_text_font_nodes[0], $party_name_tr_node, $tr_nodes, $party_type);
     }
 
     foreach my $tr_node (@$tr_nodes) {
@@ -174,11 +178,12 @@ sub GetPartyData{
 #-----------------------------------#
 sub GetPartyInfoData{
     my $self  = shift;
+    my $pk_text_font_node = shift;
     my $party_name_tr_node = shift;
     my $party_tr_nodes = shift;
     my $party_type = shift;
 
-    my ($name, $member_num, $attacker_num, $supporter_num) = ("", 0, 0, 0);
+    my ($name, $member_num, $attacker_num, $supporter_num, $pk_type) = ("", 0, 0, 0, 0);
 
     my $party_name_td_nodes = &GetNode::GetNode_Tag("td", \$party_name_tr_node);
 
@@ -193,7 +198,15 @@ sub GetPartyInfoData{
         else                                      {$supporter_num += 1;}
     }
 
-    $self->{Datas}{PartyInfo}->AddData(join(ConstData::SPLIT, ($self->{ResultNo}, $self->{GenerateNo}, $party_type, $self->{ENo}, $name, $member_num, $attacker_num, $supporter_num) ));
+    if ($pk_text_font_node && $pk_text_font_node =~ /HASH/) {
+        my $pk_text = $pk_text_font_node->as_text;
+
+        if    ($pk_text eq "風　紀　委　員　の　襲　撃") { $pk_type = 1;}
+        elsif ($pk_text eq "不　良　を　発　見")         { $pk_type = 2;}
+        elsif ($pk_text eq "風　紀　委　員　を　発　見") { $pk_type = 3;}
+    }
+
+    $self->{Datas}{PartyInfo}->AddData(join(ConstData::SPLIT, ($self->{ResultNo}, $self->{GenerateNo}, $party_type, $self->{ENo}, $name, $member_num, $attacker_num, $supporter_num, $pk_type) ));
 
     return;
 }
