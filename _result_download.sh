@@ -90,6 +90,10 @@ for ((P_NO=1; P_NO <= MAX_P_NO; P_NO++)) {
             break
         fi
 
+        if grep -q -e "\"SubTitle\">エラーページ</TH>" ./result/d/${P_NO}.html; then
+            rm ./result/d/${P_NO}.html
+        fi
+
         if [ -s ./result/d/${P_NO}.html ]; then
             break
         fi
