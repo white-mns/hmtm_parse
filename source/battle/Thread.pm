@@ -266,7 +266,7 @@ sub AddThreadMember{
 sub OutputThreadMember{
     my $self = shift;
 
-    foreach my $name( keys %{ $self->{ThreadMember} } ) {
+    foreach my $name( sort { $a cmp $b } keys %{ $self->{ThreadMember} } ) {
         my $p_no = $self->{ThreadMember}{$name};
         $self->{Datas}{ThreadMember}->AddData(join(ConstData::SPLIT, ($self->{ResultNo}, $self->{GenerateNo}, $self->{BattleType}, $self->{BattleNo}, $self->{Turn}, $self->{ThreadId},
                                                             $p_no, $name,
