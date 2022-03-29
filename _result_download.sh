@@ -1,4 +1,34 @@
 #!/bin/bash
+function WGET_CHARA_DATA_PAGE() {
+    RESULT_NO=$1
+    MAX_P_NO=$2
+
+    for ((P_NO=1; P_NO <= MAX_P_NO; P_NO++)) {
+        for ((i=0;i < 2;i++)) { # 2回までリトライする
+            if [ -s ./result/d/${P_NO}.html ]; then
+                break
+            fi
+
+            wget -O ./result/d/${P_NO}.html "http://www.sssloxia.jp/d/rp2.aspx?PNo=${P_NO}&Week=${RESULT_NO}"
+
+            sleep 5
+
+            if grep -q -e "キャラクターリスト" -e "backcircle2.png" ./result/d/${P_NO}.html; then
+                rm ./result/d/${P_NO}.html
+                break
+            fi
+
+            if grep -q -e "\"SubTitle\">エラーページ</TH>" ./result/d/${P_NO}.html; then
+                rm ./result/d/${P_NO}.html
+            fi
+
+            if [ -s ./result/d/${P_NO}.html ]; then
+                break
+            fi
+        }
+    }
+}
+
 function WGET_STATIC_PAGE() {
     MAX_P_NO=$1
     PREFIX=$2
@@ -101,31 +131,7 @@ cd ./data/orig/result${ZIP_NAME}
 
 wget -O template.css http://www.sssloxia.jp/template.css
 
-for ((P_NO=1; P_NO <= MAX_P_NO; P_NO++)) {
-    for ((i=0;i < 2;i++)) { # 2回までリトライする
-        if [ -s ./result/d/${P_NO}.html ]; then
-            break
-        fi
-
-        wget -O ./result/d/${P_NO}.html "http://www.sssloxia.jp/d/rp2.aspx?PNo=${P_NO}&Week=${RESULT_NO}"
-
-        sleep 5
-
-        if grep -q -e "キャラクターリスト" -e "backcircle2.png" ./result/d/${P_NO}.html; then
-            rm ./result/d/${P_NO}.html
-            break
-        fi
-
-        if grep -q -e "\"SubTitle\">エラーページ</TH>" ./result/d/${P_NO}.html; then
-            rm ./result/d/${P_NO}.html
-        fi
-
-        if [ -s ./result/d/${P_NO}.html ]; then
-            break
-        fi
-    }
-}
-
+WGET_CHARA_DATA_PAGE $RESULT_NO $MAX_P_NO
 WGET_STATIC_PAGE $MAX_P_NO c 100
 WGET_GREP_BATTLE_PAGE b
 WGET_GREP_BATTLE_PAGE pk
