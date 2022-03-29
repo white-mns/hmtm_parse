@@ -32,6 +32,32 @@ function WGET_STATIC_PAGE() {
     }
 }
 
+function WGET_GREP_BATTLE_PAGE() {
+    PREFIX=$1
+
+    # grepを用いてキャラ結果から戦闘結果の番号のみを抽出する。その後sortとuniqによって重複番号を除外する。
+    GREP_TARGET=`grep -rhoP "a href=\"\.\.\/${PREFIX}\/\d+\.html" ./result/c | grep -oP "\d+" | sort | uniq`
+
+    for FILE_NO in ${GREP_TARGET}
+    do
+        for ((i=0;i < 2;i++)) { # 2回までリトライする
+            if [ -s ./result/${PREFIX}/${FILE_NO}.html ]; then
+                FAILED=0
+                break
+            fi
+
+            wget -O ./result/${PREFIX}/${FILE_NO}.html http://www.sssloxia.jp/result/now/${PREFIX}/${FILE_NO}.html
+
+            sleep 2
+
+            if [ -s ./result/${PREFIX}/${FILE_NO}.html ]; then
+                FAILED=0
+                break
+            fi
+        }
+    done
+}
+
 CURENT=`pwd`	#実行ディレクトリの保存
 cd `dirname $0`	#解析コードのあるディレクトリで作業をする
 
@@ -101,10 +127,10 @@ for ((P_NO=1; P_NO <= MAX_P_NO; P_NO++)) {
 }
 
 WGET_STATIC_PAGE $MAX_P_NO c 100
-WGET_STATIC_PAGE $MAX_P_NO b 100
-WGET_STATIC_PAGE $MAX_P_NO pk 50
-WGET_STATIC_PAGE $MAX_P_NO rank 100
-WGET_STATIC_PAGE $MAX_P_NO prc 50
+WGET_GREP_BATTLE_PAGE b
+WGET_GREP_BATTLE_PAGE pk
+WGET_GREP_BATTLE_PAGE rank
+WGET_GREP_BATTLE_PAGE prc
 
 # 更新結果上は削除されているキャラデータページを削除
 for ((P_NO=1; P_NO <= MAX_P_NO; P_NO++)) {
