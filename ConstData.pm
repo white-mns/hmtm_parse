@@ -36,6 +36,7 @@ use warnings;
         use constant EXE_ACTION_TUNING_ABILITY => 1;
         use constant EXE_ACTION_PARTY          => 1;
         use constant EXE_ACTION_TEACH_SPELL    => 1;
+        use constant EXE_ACTION_NEXT_BATTLE    => 1;
     use constant EXE_BATTLE         => 1;
         use constant EXE_BATTLE_THREAD         => 1;
 1;
