@@ -156,9 +156,10 @@ sub GetSpellData{
     my $div_spell_node = ($$div_normalspell_nodes[0] && $$div_normalspell_nodes[0] =~ /HASH/) ? $$div_normalspell_nodes[0] : $$div_syncspell_nodes[0];
 
     if ($is_SSDL && $div_spell_node && $div_spell_node =~ /HASH/) {
+        my ($spell_name, $orig_spell_name, $base_spell_name, $depth_text) = ("", "", "", "");
+
         my @spell_child_nodes = $div_spell_node->content_list;
 
-        my ($spell_name, $orig_spell_name, $base_spell_name, $depth_text) = ("", "", "", "");
         if (scalar(@spell_child_nodes) <= 1) {
             if ($div_spell_node->attr("spell") && $div_spell_node->attr("spell") eq "通常攻撃") {
                 $spell_name = "通常攻撃";
@@ -177,7 +178,12 @@ sub GetSpellData{
             $orig_spell_name =~ s/[ ]*No.[F]*\d+-\d //;
             $orig_spell_name =~ s/必殺魔法！ //;
 
-            $base_spell_name =~ $orig_spell_name;
+            if (exists($self->{CommonDatas}{NameToBaseSpell}{$orig_spell_name})) {
+                $base_spell_name = $self->{CommonDatas}{NameToBaseSpell}{$orig_spell_name};
+
+            } else {
+                $base_spell_name = "？";
+            }
         }
 
         for (my $i=0;$i<$depth;$i++) {
@@ -190,8 +196,8 @@ sub GetSpellData{
         $self->{ThreadTg}     .= $depth_text ."," . $spell_name      ."," . "|";
         $self->{ThreadOrig}   .= $depth_text ."," . $orig_spell_name ."," . "|";
         $self->{ThreadOrigTg} .= $depth_text ."," . $orig_spell_name ."," . "|";
-        #$self->{ThreadBase}   .= $depth_text ."," . $base_spell_name ."," . "|";
-        #$self->{ThreadBaseTg} .= $depth_text ."," . $base_spell_name ."," . "|";
+        $self->{ThreadBase}   .= $depth_text ."," . $base_spell_name ."," . "|";
+        $self->{ThreadBaseTg} .= $depth_text ."," . $base_spell_name ."," . "|";
         $depth += 1;
         $self->{ThreadLength} += 1;
     }
@@ -223,7 +229,7 @@ sub GetSpellData{
 
                         $self->{ThreadTg}     .= $tg_depth_text ."," . $tg ."," . "|";
                         $self->{ThreadOrigTg} .= $tg_depth_text ."," . $tg ."," . "|";
-                        #$self->{ThreadBaseTg} .= $tg_depth_text ."," . $tg ."," . "|";
+                        $self->{ThreadBaseTg} .= $tg_depth_text ."," . $tg ."," . "|";
 
                     }
                 }

@@ -49,9 +49,10 @@ sub Init{
     $self->{DataHandlers}{TuneGemData}    = StoreProperData->new();
 
     #他パッケージへの引き渡し用インスタンス
-    $self->{CommonDatas}{ProperName}     = $self->{DataHandlers}{ProperName};
-    $self->{CommonDatas}{SpellData}      = $self->{DataHandlers}{SpellData};
-    $self->{CommonDatas}{TuneGemData}    = $self->{DataHandlers}{TuneGemData};
+    $self->{CommonDatas}{ProperName}      = $self->{DataHandlers}{ProperName};
+    $self->{CommonDatas}{SpellData}       = $self->{DataHandlers}{SpellData};
+    $self->{CommonDatas}{TuneGemData}     = $self->{DataHandlers}{TuneGemData};
+    $self->{CommonDatas}{NameToBaseSpell} = {};
 
     my $header_list = "";
     my $output_file = "";
