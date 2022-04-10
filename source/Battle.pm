@@ -16,6 +16,7 @@ use source::lib::GetNode;
 require "./source/lib/IO.pm";
 require "./source/lib/time.pm";
 
+require "./source/battle/BattleResult.pm";
 require "./source/battle/Turn.pm";
 
 use ConstData;        #定数呼び出し
@@ -49,7 +50,8 @@ sub Init{
     $self->{ResultNo0} = sprintf ("%02d", $self->{ResultNo});
 
     #インスタンス作成
-    if (ConstData::EXE_BATTLE_THREAD) {$self->{DataHandlers}{Turn} = Turn->new();}
+    if (ConstData::EXE_BATTLE_RESULT) {$self->{DataHandlers}{BattleResult} = BattleResult->new();}
+    if (ConstData::EXE_BATTLE_THREAD) {$self->{DataHandlers}{Turn}         = Turn->new();}
 
     #初期化処理
     foreach my $object( values %{ $self->{DataHandlers} } ) {
@@ -143,7 +145,8 @@ sub ParsePage{
     my $th_subtitle_nodes     = &GetNode::GetNode_Tag_Attr("th", "class", "SubTitle", \$tree);
 
     # データリスト取得
-    if (exists($self->{DataHandlers}{Turn})) {$self->{DataHandlers}{Turn}-> GetData($$battle_type_hash{$battle_directory}, $battle_no, $th_subtitle_nodes)};
+    if (exists($self->{DataHandlers}{BattleResult})) {$self->{DataHandlers}{BattleResult}-> GetData($$battle_type_hash{$battle_directory}, $battle_no, $th_subtitle_nodes)};
+    if (exists($self->{DataHandlers}{Turn}))         {$self->{DataHandlers}{Turn}->         GetData($$battle_type_hash{$battle_directory}, $battle_no, $th_subtitle_nodes)};
 
     $tree = $tree->delete;
 }
