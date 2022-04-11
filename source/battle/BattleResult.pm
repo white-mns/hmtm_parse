@@ -96,7 +96,7 @@ sub GetData{
     my $th_subtitle_nodes = shift;
 
     my $result = $self->CrawlResultNode($th_subtitle_nodes);
-    $self->CrawlStartNode($th_subtitle_nodes, 0);
+    $self->CrawlStartNode($th_subtitle_nodes, $result);
 
     return;
 }
@@ -150,13 +150,11 @@ sub CrawlResultNode{
         if ($subtitle =~ /戦闘終了！/) {
             my $right_table_node = $th_subtitle_node->parent->parent->right;
             my $matching_table_nodes = &GetNode::GetNode_Tag("table", \$right_table_node);
-            if (scalar(@$matching_table_nodes) > 2) {
-                #$self->GetBattleResultData($$matching_table_nodes[2], $$battle_type_hash{$subtitle});
-            }
+            return $self->GetBattleResult($right_table_node);
         }
     }
 
-    return;
+    return -99;
 }
 
 #-----------------------------------#
@@ -186,7 +184,6 @@ sub GetBattleInfoData{
         $right_party_no = $1;
     }
 
-    # パーティの先頭かつ相手PTより先頭Pnoが若いキャラクター結果からのみパーティ情報を取得する
     my ($enemy_party_name_id, $enemy_num, $enemy_names) = (0, 0, ",");
 
     if ($right_party_no == 10000) { # 右側PTのPnoが取得できないとき、NPCとしてデータを解析
@@ -203,6 +200,29 @@ sub GetBattleInfoData{
             $left_party_no, $right_party_no, $self->{BattleNo}, $self->{BattleType}, $battle_result, $enemy_party_name_id, $enemy_num, $enemy_names) ));
 
     return;
+}
+
+#-----------------------------------#
+#    戦闘結果取得
+#------------------------------------
+#    引数｜戦闘結果TABLEノード
+#          パーティ種別
+#-----------------------------------#
+sub GetBattleResult{
+    my $self  = shift;
+    my $result_table_node = shift;
+    my $battle_result = shift;
+
+    my $left_party_no = 0;
+    my $right_party_no = 10000;
+
+    my $left_win_nodes =  &GetNode::GetNode_Tag_Attr("span", "style", "Color:red",        \$result_table_node);
+    my $right_win_nodes = &GetNode::GetNode_Tag_Attr("span", "style", "Color:aquamarine", \$result_table_node);
+
+    if (scalar(@$left_win_nodes)  > 0) {return 1;}
+    if (scalar(@$right_win_nodes) > 0) {return -1;}
+
+    return 0;
 }
 
 #-----------------------------------#
