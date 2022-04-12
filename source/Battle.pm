@@ -142,10 +142,11 @@ sub ParsePage{
     my $tree = HTML::TreeBuilder->new;
     $tree->parse($content);
 
-    my $th_subtitle_nodes     = &GetNode::GetNode_Tag_Attr("th", "class", "SubTitle", \$tree);
+    my $th_subtitle_nodes  = &GetNode::GetNode_Tag_Attr("th",  "class", "SubTitle", \$tree);
+    my $div_get_rank_nodes = &GetNode::GetNode_Tag_Attr("div", "name",  "GetRank",  \$tree);
 
     # データリスト取得
-    if (exists($self->{DataHandlers}{BattleResult})) {$self->{DataHandlers}{BattleResult}-> GetData($$battle_type_hash{$battle_directory}, $battle_no, $th_subtitle_nodes)};
+    if (exists($self->{DataHandlers}{BattleResult})) {$self->{DataHandlers}{BattleResult}-> GetData($$battle_type_hash{$battle_directory}, $battle_no, $th_subtitle_nodes, $div_get_rank_nodes)};
     if (exists($self->{DataHandlers}{Turn}))         {$self->{DataHandlers}{Turn}->         GetData($$battle_type_hash{$battle_directory}, $battle_no, $th_subtitle_nodes)};
 
     $tree = $tree->delete;

@@ -8,8 +8,12 @@
 # パッケージの使用宣言    ---------------#
 use strict;
 use warnings;
+
 require "./source/lib/Store_Data.pm";
 require "./source/lib/Store_HashData.pm";
+
+require "./source/battle/Rank.pm";
+
 use ConstData;        #定数呼び出し
 use source::lib::GetNode;
 
@@ -26,6 +30,7 @@ sub new {
 
   bless {
         Datas => {},
+        DataHandlers  => {},
   }, $class;
 }
 
@@ -40,6 +45,7 @@ sub Init{
 
     #初期化
     $self->{Datas}{BattleResult} = StoreData->new();
+    if (ConstData::EXE_BATTLE_RANK) {$self->{DataHandlers}{Rank} = Rank->new();}
 
     my $header_list = "";
 
@@ -64,6 +70,12 @@ sub Init{
     $self->{Datas}{BattleResult}->SetOutputName( "./output/battle/battle_result_" . $self->{ResultNo} . "_" . $self->{GenerateNo} . ".csv" );
 
     $self->{PreviousGenerateNo} = $self->ReadPreviousGenerateNo();
+
+    #子クラスの初期化処理
+    foreach my $object( values %{ $self->{DataHandlers} } ) {
+        $object->Init($self->{ResultNo}, $self->{GenerateNo}, $self->{CommonDatas});
+    }
+
     return;
 }
 
@@ -94,9 +106,12 @@ sub GetData{
     $self->{BattleType} = shift;
     $self->{BattleNo}   = shift;
     my $th_subtitle_nodes = shift;
+    my $div_get_rank_nodes = shift;
 
-    my $result = $self->CrawlResultNode($th_subtitle_nodes);
-    $self->CrawlStartNode($th_subtitle_nodes, $result);
+    my $battle_result = $self->CrawlResultNode($th_subtitle_nodes);
+    $self->CrawlBattleStartNode($th_subtitle_nodes);
+    $self->CrawlHeadNode($th_subtitle_nodes, $battle_result);
+    $self->GetGainRp($div_get_rank_nodes);
 
     return;
 }
@@ -106,7 +121,7 @@ sub GetData{
 #------------------------------------
 #    引数｜サブタイトルデータノード一覧
 #-----------------------------------#
-sub CrawlStartNode{
+sub CrawlHeadNode{
     my $self  = shift;
     my $th_subtitle_nodes = shift;
     my $battle_result = shift;
@@ -136,6 +151,33 @@ sub CrawlStartNode{
 }
 
 #-----------------------------------#
+#    戦闘開始ノード探索
+#------------------------------------
+#    引数｜サブタイトルデータノード一覧
+#-----------------------------------#
+sub CrawlBattleStartNode{
+    my $self  = shift;
+    my $th_subtitle_nodes = shift;
+
+    $self->{NicknameIsLeft} = {};
+
+    foreach my $th_subtitle_node (@$th_subtitle_nodes) {
+        my $subtitle = $th_subtitle_node->as_text;
+
+        if ($subtitle =~ /戦闘開始！/) {
+            my $right_table_node = $th_subtitle_node->parent->parent->right;
+            my $matching_table_nodes = &GetNode::GetNode_Tag("table", \$right_table_node);
+            if (scalar(@$matching_table_nodes) > 2) {
+                $self->GetNicknameIsLeftParty($$matching_table_nodes[3],  1);
+                $self->GetNicknameIsLeftParty($$matching_table_nodes[4], -1);
+            }
+        }
+    }
+
+    return -99;
+}
+
+#-----------------------------------#
 #    戦闘結果ノード探索
 #------------------------------------
 #    引数｜サブタイトルデータノード一覧
@@ -149,7 +191,6 @@ sub CrawlResultNode{
 
         if ($subtitle =~ /戦闘終了！/) {
             my $right_table_node = $th_subtitle_node->parent->parent->right;
-            my $matching_table_nodes = &GetNode::GetNode_Tag("table", \$right_table_node);
             return $self->GetBattleResult($right_table_node);
         }
     }
@@ -199,6 +240,72 @@ sub GetBattleInfoData{
             $self->{PreviousResultNo}, $self->{PreviousGenerateNo},
             $left_party_no, $right_party_no, $self->{BattleNo}, $self->{BattleType}, $battle_result, $enemy_party_name_id, $enemy_num, $enemy_names) ));
 
+    if ($self->{BattleType} == 2 && exists($self->{DataHandlers}{Rank})) { # ランク戦データの記録
+        $self->{DataHandlers}{Rank}->SetBattleResult($left_party_no,   1, $battle_result);
+        $self->{DataHandlers}{Rank}->SetBattleResult($right_party_no, -1, $battle_result);
+    }
+
+    $self->{LeftPartyNo}  = $left_party_no;
+    $self->{RightPartyNo} = $right_party_no;
+
+    return;
+}
+
+#-----------------------------------#
+#    戦闘開始ノードから愛称と左右PT紐づけを取得
+#------------------------------------
+#    引数｜サブタイトルデータノード
+#          パーティ種別
+#-----------------------------------#
+sub GetNicknameIsLeftParty{
+    my $self  = shift;
+    my $party_table_node = shift;
+    my $is_left = shift;
+
+    if ($party_table_node !~ /HASH/) {return;}
+
+    my $tr_nodes = &GetNode::GetNode_Tag("tr", \$party_table_node);
+
+    foreach my $tr_node (@$tr_nodes) {
+        my $span_nodes = &GetNode::GetNode_Tag("span", \$tr_node);
+
+        if (scalar(@$span_nodes) == 0) {next;}
+
+        my $nickname = $$span_nodes[0]->as_text;
+        $nickname =~ s/（.+）//;
+
+        $self->{NicknameIsLeft}{$nickname} = $is_left;
+    }
+
+    return;
+}
+
+#-----------------------------------#
+#    戦闘開始ノードから愛称と左右PT紐づけを取得
+#------------------------------------
+#    引数｜サブタイトルデータノード
+#          パーティ種別
+#-----------------------------------#
+sub GetGainRp{
+    my $self  = shift;
+    my $div_get_rank_nodes = shift;
+
+    foreach my $div_get_rank_node (@$div_get_rank_nodes) {
+        my $span_nodes = &GetNode::GetNode_Tag("span", \$div_get_rank_node);
+
+        if (scalar(@$span_nodes) == 0) {next;}
+
+        my $nickname = $$span_nodes[0]->as_text;
+        my $p_no = ($self->{NicknameIsLeft}{$nickname} == 1) ? $self->{LeftPartyNo} : $self->{RightPartyNo};
+
+        if ($$span_nodes[1]->as_text =~ /(\d+)/) {
+            my $gain_rp = $1;
+            $gain_rp *= ($$span_nodes[1]->as_text =~ /増加/) ? 1 : -1;
+
+            $self->{DataHandlers}{Rank}->SetGainRp($p_no, $gain_rp);
+        }
+    }
+
     return;
 }
 
@@ -211,7 +318,6 @@ sub GetBattleInfoData{
 sub GetBattleResult{
     my $self  = shift;
     my $result_table_node = shift;
-    my $battle_result = shift;
 
     my $left_party_no = 0;
     my $right_party_no = 10000;
@@ -295,9 +401,14 @@ sub GetEnemyNamesText{
 sub Output{
     my $self = shift;
 
-    foreach my $object( values %{ $self->{Datas} } ) {
+    foreach my $object ( values %{ $self->{Datas} } ) {
         $object->Output();
     }
+
+    foreach my $object ( values %{ $self->{DataHandlers} } ) {
+        $object->Output();
+    }
+
     return;
 }
 1;

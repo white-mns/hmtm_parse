@@ -39,6 +39,7 @@ use warnings;
         use constant EXE_BATTLE_RESULT          => 1;
         use constant EXE_BATTLE_THREAD          => 1;
         use constant EXE_BATTLE_THREAD_MEMBER   => 1;
+        use constant EXE_BATTLE_RANK            => 1;
     use constant EXE_NEW                  => 1;
 
 1;

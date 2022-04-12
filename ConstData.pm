@@ -40,4 +40,5 @@ use warnings;
     use constant EXE_BATTLE         => 1;
         use constant EXE_BATTLE_RESULT         => 1;
         use constant EXE_BATTLE_THREAD         => 1;
+        use constant EXE_BATTLE_RANK           => 1;
 1;
