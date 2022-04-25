@@ -6,7 +6,8 @@ cd `dirname $0`	#解析コードのあるディレクトリで作業をする
 #------------------------------------------------------------------
 # 更新回数、再更新番号の定義確認、設定
 
-RESULT_NO=`printf "%02d" $1`
+RESULT_NO=`printf "%d" $1`
+RESULT_NO0=`printf "%02d" $1`
 GENERATE_NO=$2
 
 if [ -z "$RESULT_NO" ]; then
@@ -36,9 +37,9 @@ if [ $GENERATE_NO -lt 0 ]; then
 fi
 
 if [ $GENERATE_NO -eq 0 ]; then
-    ZIP_NAME=${RESULT_NO}
+    ZIP_NAME=${RESULT_NO0}
 else
-    ZIP_NAME=${RESULT_NO}-$GENERATE_NO
+    ZIP_NAME=${RESULT_NO0}-$GENERATE_NO
 fi
 
 #------------------------------------------------------------------
@@ -61,7 +62,7 @@ if [ -f ./data/orig/result${ZIP_NAME}.zip ]; then
     cd ./data/orig
 
     rm  -rf result
-    rm  -rf result${RESULT_NO}
+    rm  -rf result${RESULT_NO0}
     rm  -rf result${ZIP_NAME}
 
     unzip -q result${ZIP_NAME}.zip
