@@ -7,7 +7,7 @@
 # モジュール呼び出し    ---------------#
 require "./source/lib/IO.pm";
 require "./source/lib/time.pm";
-require "./source/ProperName.pm";
+require "./source/CommonData.pm";
 require "./source/UploadedCheck.pm";
 
 require "./source/Character.pm";
@@ -52,7 +52,7 @@ sub Main{
     my @objects;        #探索するデータ項目の登録
     my %common_datas;
 
-    push(@objects, ProperName->new()); # 固有名詞読み込み・保持
+    push(@objects, CommonData->new()); # 固有名詞読み込み・保持
                                {push(@objects, UploadedCheck->new());} #データ更新状況チェック用データ作成
     if (ConstData::EXE_DATA)   {push(@objects, DataList->new());}      #データリストページ読み込み
     if (ConstData::EXE_CHARA)  {push(@objects, Character->new());}     #キャラステータスページ読み込み
