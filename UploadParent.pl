@@ -55,6 +55,7 @@ sub Main {
         &UploadData($upload, ConstData::EXE_DATA_TUNE_GEM,    "tune_gem_data",     "./output/data/tune_gem_data.csv");
 
         &UploadResult($upload, $result_no, $generate_no, ConstData::EXE_DATA_OBSOLESCENCE, "obsolescences", "./output/data/obsolescence_");
+        &UploadResult($upload, $result_no, $generate_no, ConstData::EXE_DATA_PK_PKK,       "pk_pkks",       "./output/data/pk_pkk_");
     }
     if (ConstData::EXE_NEW) {
     }

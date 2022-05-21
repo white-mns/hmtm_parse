@@ -245,10 +245,50 @@ sub GetBattleInfoData{
         $self->{DataHandlers}{Rank}->SetBattleResult($right_party_no, -1, $battle_result);
     }
 
+    if ($self->{BattleType} == 3 && exists($self->{CommonDatas}{PkPkk})) { # 風紀戦データの記録
+        $self->GetPkData($tr_nodes, $battle_result);
+    }
+
     $self->{LeftPartyNo}  = $left_party_no;
     $self->{RightPartyNo} = $right_party_no;
 
     return;
+}
+
+#-----------------------------------#
+#    風紀戦情報取得
+#------------------------------------
+#    引数｜パーティ名ノード
+#-----------------------------------#
+sub GetPkData{
+    my $self  = shift;
+    my $party_tr_nodes = shift;
+    my $battle_result = shift;
+
+    foreach my $party_tr_node (@$party_tr_nodes) {
+        my $td_nodes = &GetNode::GetNode_Tag("td", \$party_tr_node);
+
+        my $left_p_no = 0;
+        my $right_p_no = 0;
+
+        if ($$td_nodes[1]->as_text =~ /PNo\.(\d+) /) {$left_p_no = $1;}
+        if ($$td_nodes[4]->as_text =~ /PNo\.(\d+) /) {$right_p_no = $1;} # 2人目移行
+        if ($$td_nodes[5]->as_text =~ /PNo\.(\d+) /) {$right_p_no = $1;} # 先頭
+
+        my $pk_type = $self->{CommonDatas}{PreviousPKType}{$left_p_no};
+
+        # サポーターでなければ勝敗を加算
+        if ($pk_type && $pk_type >= 2 && $$td_nodes[2]->as_text !~ /CHEER/) {
+            $self->{CommonDatas}{PkPkk}->SetBattleResult($left_p_no,  0,  1, $battle_result);
+            $self->{CommonDatas}{PkPkk}->SetBattleResult($left_p_no,  $pk_type,  1, $battle_result);
+        }
+
+        $pk_type = $self->{CommonDatas}{PreviousPKType}{$right_p_no};
+        if ($pk_type && $pk_type >= 2 && $$td_nodes[3]->as_text !~ /CHEER/) {
+            $self->{CommonDatas}{PkPkk}->SetBattleResult($right_p_no, 0, -1, $battle_result);
+            $self->{CommonDatas}{PkPkk}->SetBattleResult($right_p_no, $pk_type, -1, $battle_result);
+        }
+    }
 }
 
 #-----------------------------------#

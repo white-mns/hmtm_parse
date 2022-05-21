@@ -16,6 +16,8 @@ use source::lib::GetNode;
 require "./source/data/StoreProperName.pm";
 require "./source/data/StoreProperData.pm";
 
+require "./source/data/PkPkk.pm";
+
 use ConstData;        #定数呼び出し
 
 #------------------------------------------------------------------#
@@ -47,11 +49,13 @@ sub Init{
     $self->{DataHandlers}{ProperName}     = StoreProperName->new();
     $self->{DataHandlers}{SpellData}      = StoreProperData->new();
     $self->{DataHandlers}{TuneGemData}    = StoreProperData->new();
+    $self->{DataHandlers}{PkPkk}          = PkPkk->new();
 
     #他パッケージへの引き渡し用インスタンス
     $self->{CommonDatas}{ProperName}      = $self->{DataHandlers}{ProperName};
     $self->{CommonDatas}{SpellData}       = $self->{DataHandlers}{SpellData};
     $self->{CommonDatas}{TuneGemData}     = $self->{DataHandlers}{TuneGemData};
+    $self->{CommonDatas}{PkPkk}           = $self->{DataHandlers}{PkPkk};
     $self->{CommonDatas}{NameToBaseSpell} = {};
 
     my $header_list = "";
@@ -93,6 +97,8 @@ sub Init{
     ];
     $output_file = "./output/data/". "tune_gem_data" . ".csv";
     $self->{DataHandlers}{TuneGemData}->Init($header_list, $output_file, [" ", " ", 0, " "]);
+
+    $self->{DataHandlers}{PkPkk}->Init($self->{ResultNo}, $self->{GenerateNo}, $self->{CommonDatas});
 
     return;
 }

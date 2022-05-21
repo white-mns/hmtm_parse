@@ -41,6 +41,7 @@ sub Init{
     #初期化
     $self->{Datas}{Party}     = StoreData->new();
     $self->{Datas}{PartyInfo} = StoreData->new();
+    $self->{Datas}{PKType}    = StoreData->new();
 
     my $header_list = "";
 
@@ -69,9 +70,19 @@ sub Init{
 
     $self->{Datas}{PartyInfo}->Init($header_list);
 
+    $header_list = [
+        "result_no",
+        "generate_no",
+        "p_no",
+        "pk_type",
+    ];
+
+    $self->{Datas}{PKType}->Init($header_list);
+
     #出力ファイル設定
     $self->{Datas}{Party}->SetOutputName    ( "./output/action/party_"       . $self->{ResultNo} . "_" . $self->{GenerateNo} . ".csv" );
     $self->{Datas}{PartyInfo}->SetOutputName( "./output/action/party_info_"  . $self->{ResultNo} . "_" . $self->{GenerateNo} . ".csv" );
+    $self->{Datas}{PKType}->SetOutputName   ( "./output/action/pk_type_"     . $self->{ResultNo} . "_" . $self->{GenerateNo} . ".csv" );
 
     $self->ReadPreviousPkType();
 
@@ -87,7 +98,7 @@ sub ReadPreviousPkType(){
     my $file_name = "";
     # 前回結果の確定版ファイルを探索
     for (my $i=10; $i>=0; $i--){
-        $file_name = "./output/action/party_info_" . ($self->{PreviousResultNo}) . "_" . $i . ".csv" ;
+        $file_name = "./output/action/pk_type_" . ($self->{PreviousResultNo}) . "_" . $i . ".csv" ;
 
         if(-f $file_name) {last;}
     }
@@ -99,11 +110,9 @@ sub ReadPreviousPkType(){
     shift (@file_data);
 
     foreach my  $data_set(@file_data){
-        my @party_info_data   = split(ConstData::SPLIT, $data_set);
+        my @pk_type_data   = split(ConstData::SPLIT, $data_set);
 
-        if ($party_info_data[2] != 13) {next;}
-
-        $self->{PreviousPK}{$party_info_data[3]} = $party_info_data[8];
+        $self->{CommonDatas}{PreviousPKType}{$pk_type_data[2]} = $pk_type_data[3];
     }
 
     return 0;
@@ -187,10 +196,12 @@ sub GetPartyData{
         $party_no = $1;
     }
 
-    if ($self->{ENo} == $party_no) { # パーティの戦闘のキャラクター結果からのみパーティ情報を取得する
+
+    if ($self->{ENo} == $party_no) { # パーティの先頭のキャラクター結果からのみパーティ情報を取得する
         my $parent_node = $matching_table_node->parent->parent;
         my $pk_text_font_nodes = &GetNode::GetNode_Tag_Attr("font", "color", "red", \$parent_node);
 
+        $self->GetPkInfoData($$pk_text_font_nodes[0], $tr_nodes, $party_type);
         $self->GetPartyInfoData($$pk_text_font_nodes[0], $party_name_tr_node, $tr_nodes, $party_type);
     }
 
@@ -242,14 +253,60 @@ sub GetPartyInfoData{
         elsif ($pk_text eq "風　紀　委　員　を　発　見") { $pk_type = 3;}
     }
 
-    if ($party_type == 3 && exists($self->{PreviousPK}{$self->{ENo}})) { # 前回予告時の不良・風紀情報を引き継ぎ
-        $pk_type = $self->{PreviousPK}{$self->{ENo}};
+    if ($party_type == 3 && exists($self->{CommonDatas}{PreviousPKType}{$self->{ENo}})) { # 前回予告時の不良・風紀情報を引き継ぎ
+        $pk_type = $self->{CommonDatas}{PreviousPKType}{$self->{ENo}};
     }
 
     $self->{Datas}{PartyInfo}->AddData(join(ConstData::SPLIT, ($self->{ResultNo}, $self->{GenerateNo}, $party_type, $self->{ENo}, $name, $member_num, $attacker_num, $supporter_num, $pk_type) ));
 
     return;
 }
+
+
+#-----------------------------------#
+#    風紀戦情報取得
+#------------------------------------
+#    引数｜パーティ名
+#          パーティ種別
+#-----------------------------------#
+sub GetPkInfoData{
+    my $self  = shift;
+    my $pk_text_font_node = shift;
+    my $party_tr_nodes = shift;
+    my $party_type = shift;
+
+    my $pk_type = 0;
+
+    if ($pk_text_font_node && $pk_text_font_node =~ /HASH/) {
+        my $pk_text = $pk_text_font_node->as_text;
+
+        if    ($pk_text eq "風　紀　委　員　の　襲　撃") { $pk_type = 1;}
+        elsif ($pk_text eq "不　良　を　発　見")         { $pk_type = 2;}
+        elsif ($pk_text eq "風　紀　委　員　を　発　見") { $pk_type = 3;}
+    }
+
+    if ($pk_type == 0) {return;}
+
+    foreach my $tr_node (@$party_tr_nodes) {
+        my $td_nodes = &GetNode::GetNode_Tag("td", \$tr_node);
+
+        if ($$td_nodes[1]->as_text =~ /PNo\.(\d+) /) {
+            my $p_no = $1;
+            my $is_supporter = ($$td_nodes[2]->as_text =~ /CHEER/) ? 1 : 0;
+
+            $self->{Datas}{PKType}->AddData(join(ConstData::SPLIT, ($self->{ResultNo}, $self->{GenerateNo}, $p_no, $pk_type) ));
+
+            if ($pk_type < 2) {next;}
+
+            $self->{CommonDatas}{PkPkk}->SetBattleAnnouncement($p_no,  0, $is_supporter);
+            $self->{CommonDatas}{PkPkk}->SetBattleAnnouncement($p_no,  $pk_type, $is_supporter);
+        }
+    }
+
+
+    return;
+}
+
 #-----------------------------------#
 #    出力
 #------------------------------------

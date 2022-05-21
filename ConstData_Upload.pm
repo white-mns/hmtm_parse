@@ -22,6 +22,7 @@ use warnings;
         use constant EXE_DATA_SPELL             => 1;
         use constant EXE_DATA_TUNE_GEM          => 1;
         use constant EXE_DATA_OBSOLESCENCE      => 1;
+        use constant EXE_DATA_PK_PKK            => 1;
     use constant EXE_CHARA                => 1;
         use constant EXE_CHARA_NAME             => 1;
         use constant EXE_CHARA_PROFILE          => 1;
