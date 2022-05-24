@@ -88,6 +88,45 @@ function WGET_GREP_BATTLE_PAGE() {
     done
 }
 
+function WGET_GREP_RAID_BATTLE_PAGE() {
+    MAX_PROGRESS_NO=$1
+    PREFIX=$2
+    MAX_FAILED=$3
+
+    # grepを用いてキャラ結果から戦闘結果の番号のみを抽出する。その後sortとuniqによって重複番号を除外する。
+    GREP_TARGET=`grep -rhoP "a href=\"\.\.\/${PREFIX}\/\d+-\d\.html" ./result/c | grep -oP "/\d+" | grep -oP "\d+" | sort | uniq`
+
+    for PARTY_NO in ${GREP_TARGET}
+    do
+        for ((PROGRESS_NO=1; PROGRESS_NO <= MAX_PROGRESS_NO; PROGRESS_NO++)) {
+            if [ $((FAILED)) -eq  $((MAX_FAILED)) ]; then # 指定回数以上失敗した場合、出力ページの最後に辿り着いたと判定して次のレイドPTを取得する
+                FAILED=0
+                break
+            fi
+
+            for ((i=0;i < 2;i++)) { # 2回までリトライする
+                if [ -s ./result/${PREFIX}/${PARTY_NO}-${PROGRESS_NO}.html ]; then
+                    FAILED=0
+                    break
+                fi
+
+                wget -O ./result/${PREFIX}/${PARTY_NO}-${PROGRESS_NO}.html http://www.sssloxia.jp/result/now/${PREFIX}/${PARTY_NO}-${PROGRESS_NO}.html
+
+                sleep 2
+
+                if [ -s ./result/${PREFIX}/${PARTY_NO}-${PROGRESS_NO}.html ]; then
+                    FAILED=0
+                    break
+                fi
+            }
+
+            if [ ! -s /result/${PREFIX}/${P_NO}-${PROGRESS_NO}.html ]; then
+                FAILED=$(( FAILED + 1 ))
+            fi
+        }
+    done
+}
+
 CURENT=`pwd`	#実行ディレクトリの保存
 cd `dirname $0`	#解析コードのあるディレクトリで作業をする
 
@@ -117,6 +156,7 @@ mkdir ./data/orig/result${ZIP_NAME}/result/b
 mkdir ./data/orig/result${ZIP_NAME}/result/pk
 mkdir ./data/orig/result${ZIP_NAME}/result/prc
 mkdir ./data/orig/result${ZIP_NAME}/result/rank
+mkdir ./data/orig/result${ZIP_NAME}/result/raid
 
 cd ./data/list
 
@@ -137,6 +177,7 @@ WGET_GREP_BATTLE_PAGE b
 WGET_GREP_BATTLE_PAGE pk
 WGET_GREP_BATTLE_PAGE rank
 WGET_GREP_BATTLE_PAGE prc
+WGET_GREP_RAID_BATTLE_PAGE 100 raid 2
 
 # 更新結果上は削除されているキャラデータページを削除
 for ((P_NO=1; P_NO <= MAX_P_NO; P_NO++)) {
