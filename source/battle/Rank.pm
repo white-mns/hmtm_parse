@@ -141,6 +141,27 @@ sub GetData{
 }
 
 #-----------------------------------#
+#    RP増減登録
+#------------------------------------
+#    引数｜p_no
+#          RP増減値
+#-----------------------------------#
+sub GetRaidRewardData{
+    my $self  = shift;
+    my $p_no = shift;
+    my $div_raid_nodes = shift;
+
+    if (!$div_raid_nodes) {return;}
+
+    if ($div_raid_nodes->as_text !~ /(\d+) RPを報酬として入手！/) {return;}
+
+    my $raid_reward_rp = $1;
+    $self->GainRp($p_no, $raid_reward_rp);
+
+    return;
+}
+
+#-----------------------------------#
 #    ランク戦結果登録
 #------------------------------------
 #    引数｜p_no
@@ -169,7 +190,7 @@ sub SetBattleResult{
 #    引数｜p_no
 #          RP増減値
 #-----------------------------------#
-sub SetGainRp{
+sub GainRp{
     my $self  = shift;
     my $p_no = shift;
     my $gain_rp = shift;

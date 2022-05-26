@@ -128,6 +128,7 @@ sub ParsePage{
     my $div_alter_spell_nodes = &GetNode::GetNode_Tag_Attr("div", "name", "AlterSpell", \$tree);
     my $th_subtitle_nodes     = &GetNode::GetNode_Tag_Attr("th", "class", "SubTitle", \$tree);
     my $div_teach_spell_nodes = &GetNode::GetNode_Tag_Attr("div", "name", "TeachSpell", \$tree);
+    my $div_raid_nodes        = &GetNode::GetNode_Tag_Attr("div", "name", "Raid", \$tree);
     push (@$div_alter_spell_nodes, @$div_alter_skill_nodes);
 
     # データリスト取得
@@ -135,6 +136,7 @@ sub ParsePage{
     if (exists($self->{DataHandlers}{Party}))         {$self->{DataHandlers}{Party}->        GetData($p_no, $th_subtitle_nodes)};
     if (exists($self->{DataHandlers}{TeachSpell}))    {$self->{DataHandlers}{TeachSpell}->   GetData($p_no, $div_teach_spell_nodes)};
     if (exists($self->{DataHandlers}{NextBattle}))    {$self->{DataHandlers}{NextBattle}->   GetData($p_no, $th_subtitle_nodes)};
+    if (exists($self->{CommonDatas}{Rank}))           {$self->{CommonDatas}{Rank}->          GetRaidRewardData($p_no, $$div_raid_nodes[0])};
 
     $tree = $tree->delete;
 }

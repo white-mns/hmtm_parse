@@ -12,7 +12,6 @@ use warnings;
 require "./source/lib/Store_Data.pm";
 require "./source/lib/Store_HashData.pm";
 
-require "./source/battle/Rank.pm";
 
 use ConstData;        #定数呼び出し
 use source::lib::GetNode;
@@ -45,7 +44,6 @@ sub Init{
 
     #初期化
     $self->{Datas}{BattleResult} = StoreData->new();
-    if (ConstData::EXE_BATTLE_RANK) {$self->{DataHandlers}{Rank} = Rank->new();}
 
     my $header_list = "";
 
@@ -240,9 +238,9 @@ sub GetBattleInfoData{
             $self->{PreviousResultNo}, $self->{PreviousGenerateNo},
             $left_party_no, $right_party_no, $self->{BattleNo}, $self->{BattleType}, $battle_result, $enemy_party_name_id, $enemy_num, $enemy_names) ));
 
-    if ($self->{BattleType} == 2 && exists($self->{DataHandlers}{Rank})) { # ランク戦データの記録
-        $self->{DataHandlers}{Rank}->SetBattleResult($left_party_no,   1, $battle_result);
-        $self->{DataHandlers}{Rank}->SetBattleResult($right_party_no, -1, $battle_result);
+    if ($self->{BattleType} == 2 && exists($self->{CommonDatas}{Rank})) { # ランク戦データの記録
+        if ($self->{CommonDatas}{Rank}) {$self->{CommonDatas}{Rank}->SetBattleResult($left_party_no,   1, $battle_result);}
+        if ($self->{CommonDatas}{Rank}) {$self->{CommonDatas}{Rank}->SetBattleResult($right_party_no, -1, $battle_result);}
     }
 
     if ($self->{BattleType} == 3 && exists($self->{CommonDatas}{PkPkk})) { # 風紀戦データの記録
@@ -342,7 +340,7 @@ sub GetGainRp{
             my $gain_rp = $1;
             $gain_rp *= ($$span_nodes[1]->as_text =~ /増加/) ? 1 : -1;
 
-            $self->{DataHandlers}{Rank}->SetGainRp($p_no, $gain_rp);
+            if ($self->{CommonDatas}{Rank}) {$self->{CommonDatas}{Rank}->GainRp($p_no, $gain_rp);}
         }
     }
 
