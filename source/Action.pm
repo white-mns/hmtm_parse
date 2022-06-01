@@ -21,6 +21,7 @@ require "./source/action/TuningAbility.pm";
 require "./source/action/Party.pm";
 require "./source/action/TeachSpell.pm";
 require "./source/action/NextBattle.pm";
+require "./source/action/RaidReward.pm";
 
 use ConstData;        #定数呼び出し
 
@@ -57,6 +58,7 @@ sub Init{
     if (ConstData::EXE_ACTION_PARTY)          {$self->{DataHandlers}{Party}         = Party->new();}
     if (ConstData::EXE_ACTION_TEACH_SPELL)    {$self->{DataHandlers}{TeachSpell}    = TeachSpell->new();}
     if (ConstData::EXE_ACTION_NEXT_BATTLE)    {$self->{DataHandlers}{NextBattle}    = NextBattle->new();}
+    if (ConstData::EXE_ACTION_RAID_REWARD)    {$self->{DataHandlers}{RaidReward}    = RaidReward->new();}
 
     #初期化処理
     foreach my $object( values %{ $self->{DataHandlers} } ) {
@@ -136,7 +138,7 @@ sub ParsePage{
     if (exists($self->{DataHandlers}{Party}))         {$self->{DataHandlers}{Party}->        GetData($p_no, $th_subtitle_nodes)};
     if (exists($self->{DataHandlers}{TeachSpell}))    {$self->{DataHandlers}{TeachSpell}->   GetData($p_no, $div_teach_spell_nodes)};
     if (exists($self->{DataHandlers}{NextBattle}))    {$self->{DataHandlers}{NextBattle}->   GetData($p_no, $th_subtitle_nodes)};
-    if (exists($self->{CommonDatas}{Rank}))           {$self->{CommonDatas}{Rank}->          GetRaidRewardData($p_no, $$div_raid_nodes[0])};
+    if (exists($self->{DataHandlers}{RaidReward}))    {$self->{DataHandlers}{RaidReward}->   GetData($p_no, $$div_raid_nodes[0])};
 
     $tree = $tree->delete;
 }

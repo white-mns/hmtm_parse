@@ -73,6 +73,7 @@ sub Main {
         &UploadResult($upload, $result_no, $generate_no, ConstData::EXE_ACTION_PARTY,          "parties",           "./output/action/party_");
         &UploadResult($upload, $result_no, $generate_no, ConstData::EXE_ACTION_TEACH_SPELL,    "teach_spells",      "./output/action/teach_spell_");
         &UploadResult($upload, $result_no, $generate_no, ConstData::EXE_ACTION_NEXT_BATTLE,    "next_battle_infos", "./output/action/next_battle_info_");
+        &UploadResult($upload, $result_no, $generate_no, ConstData::EXE_ACTION_RAID_REWARD,    "raid_rewards",      "./output/action/raid_reward_");
     }
     if (ConstData::EXE_BATTLE) {
         &UploadResult($upload, $result_no, $generate_no, ConstData::EXE_BATTLE_RESULT,        "battle_results",       "./output/battle/battle_result_");
