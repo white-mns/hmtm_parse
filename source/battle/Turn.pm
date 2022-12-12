@@ -62,9 +62,10 @@ sub GetData{
     my $self            = shift;
     $self->{BattleType} = shift;
     $self->{BattleNo}   = shift;
+    $self->{PageNo}     = shift;
     my $th_subtitle_nodes = shift;
 
-    $self->{Datas}{Thread}->BattleStart($self->{BattleType}, $self->{BattleNo});
+    $self->{Datas}{Thread}->BattleStart($self->{BattleType}, $self->{BattleNo}, $self->{PageNo});
 
     $self->ParseTurnNodes($th_subtitle_nodes);
 

@@ -73,7 +73,7 @@ sub Execute{
     my @battle_directories = ('b','prc','rank','pk');
     #my @battle_directories = ('prc');
     foreach my $battle_directory (@battle_directories) {
-        $self->CrawlBattledirectory($battle_directory);
+        $self->CrawlBattleDirectory($battle_directory);
     }
 
     return ;
@@ -84,7 +84,7 @@ sub Execute{
 #-----------------------------------#
 #
 #-----------------------------------#
-sub CrawlBattledirectory{
+sub CrawlBattleDirectory{
     my $self = shift;
     my $battle_directory = shift;
 
@@ -110,7 +110,7 @@ sub CrawlBattledirectory{
     for (my $battle_no=$start; $battle_no<=$end; $battle_no++) {
         if ($battle_no % 10 == 0) {print $battle_no . "\n"};
 
-        $self->ParsePage($directory."/".$battle_no.".html", $battle_directory, $battle_no);
+        $self->ParsePage($directory."/".$battle_no.".html", $battle_directory, $battle_no, -1);
     }
 
     return ;
@@ -120,15 +120,17 @@ sub CrawlBattledirectory{
 #       ファイルを解析
 #-----------------------------------#
 #    引数｜ファイル名
-#    　　　ENo
+#    　　　ディレクトリ名
+#    　　　戦闘ページ番号
 ##-----------------------------------#
 sub ParsePage{
     my $self        = shift;
     my $file_name   = shift;
     my $battle_directory = shift;
     my $battle_no        = shift;
+    my $page_no          = shift;
 
-    my $battle_type_hash = {'b'=> 0,'prc' => 1,'rank' => 2,'pk' => 3};
+    my $battle_type_hash = {'b'=> 0,'prc' => 1,'rank' => 2,'pk' => 3,'raid' => 4};
 
     #結果の読み込み
     my $content = "";
@@ -146,8 +148,8 @@ sub ParsePage{
     my $div_get_rank_nodes = &GetNode::GetNode_Tag_Attr("div", "name",  "GetRank",  \$tree);
 
     # データリスト取得
-    if (exists($self->{DataHandlers}{BattleResult})) {$self->{DataHandlers}{BattleResult}-> GetData($$battle_type_hash{$battle_directory}, $battle_no, $th_subtitle_nodes, $div_get_rank_nodes)};
-    if (exists($self->{DataHandlers}{Turn}))         {$self->{DataHandlers}{Turn}->         GetData($$battle_type_hash{$battle_directory}, $battle_no, $th_subtitle_nodes)};
+    if (exists($self->{DataHandlers}{BattleResult})) {$self->{DataHandlers}{BattleResult}-> GetData($$battle_type_hash{$battle_directory}, $battle_no, $page_no, $th_subtitle_nodes, $div_get_rank_nodes)};
+    if (exists($self->{DataHandlers}{Turn}))         {$self->{DataHandlers}{Turn}->         GetData($$battle_type_hash{$battle_directory}, $battle_no, $page_no, $th_subtitle_nodes)};
 
     $tree = $tree->delete;
 }

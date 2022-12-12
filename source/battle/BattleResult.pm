@@ -103,8 +103,11 @@ sub GetData{
     my $self    = shift;
     $self->{BattleType} = shift;
     $self->{BattleNo}   = shift;
+    $self->{PageNo}     = shift;
     my $th_subtitle_nodes = shift;
     my $div_get_rank_nodes = shift;
+
+    if ($self->{BattleType} == 4) {return;} # レイド戦の各ページごとの勝敗は取得しない
 
     my $battle_result = $self->CrawlResultNode($th_subtitle_nodes);
     $self->CrawlBattleStartNode($th_subtitle_nodes);

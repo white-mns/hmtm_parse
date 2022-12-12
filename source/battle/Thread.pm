@@ -46,6 +46,7 @@ sub Init{
                 "generate_no",
                 "battle_type",
                 "battle_no",
+                "page_no",
                 "turn",
                 "thread_id",
                 "thread",
@@ -65,6 +66,7 @@ sub Init{
                 "generate_no",
                 "battle_type",
                 "battle_no",
+                "page_no",
                 "turn",
                 "thread_id",
                 "p_no",
@@ -125,7 +127,7 @@ sub GetThreadData{
             $depth = $self->GetSpellData(1, $depth, $child_node);
 
             $self->OutputThreadMember();
-            $self->{Datas}{Thread}->AddData(join(ConstData::SPLIT, ($self->{ResultNo}, $self->{GenerateNo}, $self->{BattleType}, $self->{BattleNo}, $self->{Turn}, $self->{ThreadId},
+            $self->{Datas}{Thread}->AddData(join(ConstData::SPLIT, ($self->{ResultNo}, $self->{GenerateNo}, $self->{BattleType}, $self->{BattleNo}, $self->{PageNo}, $self->{Turn}, $self->{ThreadId},
                                                                 $self->{Thread}, $self->{ThreadTg},
                                                                 $self->{ThreadOrig}, $self->{ThreadOrigTg},
                                                                 $self->{ThreadBase}, $self->{ThreadBaseTg},
@@ -274,7 +276,7 @@ sub OutputThreadMember{
 
     foreach my $name( sort { $a cmp $b } keys %{ $self->{ThreadMember} } ) {
         my $p_no = $self->{ThreadMember}{$name};
-        $self->{Datas}{ThreadMember}->AddData(join(ConstData::SPLIT, ($self->{ResultNo}, $self->{GenerateNo}, $self->{BattleType}, $self->{BattleNo}, $self->{Turn}, $self->{ThreadId},
+        $self->{Datas}{ThreadMember}->AddData(join(ConstData::SPLIT, ($self->{ResultNo}, $self->{GenerateNo}, $self->{BattleType}, $self->{BattleNo}, $self->{PageNo}, $self->{Turn}, $self->{ThreadId},
                                                             $p_no, $name,
                                                             ) ));
     }
@@ -289,6 +291,7 @@ sub BattleStart{
     my $self = shift;
     $self->{BattleType} = shift;
     $self->{BattleNo} = shift;
+    $self->{PageNo} = shift;
 
     $self->{ThreadId} = 0;
     $self->{ActId} = 0;
