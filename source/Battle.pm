@@ -75,6 +75,7 @@ sub Execute{
     foreach my $battle_directory (@battle_directories) {
         $self->CrawlBattleDirectory($battle_directory);
     }
+    $self->CrawlRaidBattleDirectory();
 
     return ;
 }
@@ -111,6 +112,50 @@ sub CrawlBattleDirectory{
         if ($battle_no % 10 == 0) {print $battle_no . "\n"};
 
         $self->ParsePage($directory."/".$battle_no.".html", $battle_directory, $battle_no, -1);
+    }
+
+    return ;
+}
+
+#-----------------------------------#
+#    レイド戦闘結果ファイルを抽出
+#-----------------------------------#
+#
+#-----------------------------------#
+sub CrawlRaidBattleDirectory{
+    my $self = shift;
+    my $battle_directory = "raid";
+
+    print "read battle files 'raid'...\n";
+
+    my $start = 1;
+    my $end   = 0;
+    my $directory = './data/orig/result' . $self->{ResultNo0};
+    $directory .= ($self->{GenerateNo} == 0) ? '' :  '-' . $self->{GenerateNo};
+    $directory .= '/result/raid';
+
+	opendir (DIR, $directory);
+	my @file_list = readdir (DIR);
+	closedir (DIR);
+
+    if (ConstData::EXE_ALLRESULT) {
+        #結果全解析
+	    @file_list = grep(/^\d+-\d+\.html/, @file_list);
+    }else{
+        #指定範囲解析
+	    @file_list = grep(/^\d+-1\.html/, @file_list);
+    }
+    @file_list = sort { $a cmp $b } @file_list;
+
+	#ディレクトリを開き、小ディレクトリ名を取得
+	foreach my $file_name (@file_list){
+        $file_name =~ /^(\d+)-(\d+)\.html/;
+        my $battle_no = $1;
+        my $page_no = $2;
+
+        if ($page_no == 1) {print $file_name."\n"};
+
+        $self->ParsePage($directory."/".$file_name, $battle_directory, $battle_no, $page_no);
     }
 
     return ;
