@@ -71,7 +71,7 @@ sub Execute{
 
 
     my @battle_directories = ('b','prc','rank','pk');
-    #my @battle_directories = ('prc');
+    # @battle_directories = ('prc');
     foreach my $battle_directory (@battle_directories) {
         $self->CrawlBattleDirectory($battle_directory);
     }

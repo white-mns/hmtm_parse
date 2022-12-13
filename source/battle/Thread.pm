@@ -13,6 +13,8 @@ require "./source/lib/Store_HashData.pm";
 use ConstData;        #定数呼び出し
 use source::lib::GetNode;
 
+require "./source/battle/BattleRanking.pm";
+
 #------------------------------------------------------------------#
 #    パッケージの定義
 #------------------------------------------------------------------#
@@ -37,6 +39,7 @@ sub Init{
     ($self->{ResultNo}, $self->{GenerateNo}, $self->{CommonDatas}) = @_;
 
     #初期化
+    $self->{Datas}{BattleRanking} = BattleRanking->new();
     $self->{Datas}{Thread} = StoreData->new();
     $self->{Datas}{ThreadMember} = StoreData->new();
     my $header_list = "";
@@ -74,6 +77,7 @@ sub Init{
     ];
 
     $self->{Datas}{ThreadMember}->Init($header_list);
+    $self->{Datas}{BattleRanking}->Init($self->{ResultNo}, $self->{GenerateNo}, $self->{CommonDatas});
 
     #出力ファイル設定
     $self->{Datas}{Thread}->SetOutputName      ( "./output/battle/thread_"        . $self->{ResultNo} . "_" . $self->{GenerateNo} . ".csv" );
@@ -202,7 +206,10 @@ sub GetSpellData{
         $self->{ThreadBaseTg} .= $depth_text ."," . $base_spell_name ."," . "|";
         $depth += 1;
         $self->{ThreadLength} += 1;
+
+        $self->{Datas}{BattleRanking}->CalcBattleRanking($self->{BattleType}, $self->{BattleNo}, $self->{PageNo}, $self->{Turn}, $self->{ThreadId}, $is_SSDL, $depth, $spell_name, $orig_spell_name, $base_spell_name, $div_SSDL_node);
     }
+
 
     my @child_nodes = $div_SSDL_node->content_list;
     my $start_depth = $depth;
