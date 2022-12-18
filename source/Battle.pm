@@ -133,6 +133,8 @@ sub CrawlRaidBattleDirectory{
     $directory .= ($self->{GenerateNo} == 0) ? '' :  '-' . $self->{GenerateNo};
     $directory .= '/result/raid';
 
+    if (!-d $directory) {return;}
+
 	opendir (DIR, $directory);
 	my @file_list = readdir (DIR);
 	closedir (DIR);
