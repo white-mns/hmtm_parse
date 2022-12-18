@@ -85,7 +85,7 @@ sub ParseTurnNodes{
     if (!$nodes) {return;}
 
     foreach my $node (@$nodes) {
-        if ($node->as_text =~ /ターン(\d+?)/) {
+        if ($node->as_text =~ /ターン(\d+)/) {
             my $turn = $1;
             my @subtitle_right_nodes = $node->parent->parent->right;
             my $battle_turn_node = $subtitle_right_nodes[4];
