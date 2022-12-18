@@ -95,7 +95,6 @@ sub GetData{
     $self->{Turn} = shift;
     my $battle_turn_node = shift;
 
-
     $self->GetThreadData($battle_turn_node);
 
     return;
@@ -125,6 +124,8 @@ sub GetThreadData{
         $self->{ThreadBaseTg} = "";
         $self->{ThreadLength} = 0;
         $self->{ThreadMember} = {};
+        $self->{LastSpellUser} = "";
+        $self->{LastSpellName} = "";
         my $depth = 0;
 
         if ($child_node =~ /HASH/ && $child_node->attr("name") && $child_node->attr("name") eq "SSDL") {
@@ -161,7 +162,7 @@ sub GetSpellData{
 
     my $div_spell_node = ($$div_normalspell_nodes[0] && $$div_normalspell_nodes[0] =~ /HASH/) ? $$div_normalspell_nodes[0] : $$div_syncspell_nodes[0];
 
-    if ($is_SSDL && $div_spell_node && $div_spell_node =~ /HASH/) {
+    if ($is_SSDL && $div_SSDL_node->attr("class") eq "id1" && $div_spell_node && $div_spell_node =~ /HASH/) {
         my ($spell_name, $orig_spell_name, $base_spell_name, $depth_text) = ("", "", "", "");
 
         my @spell_child_nodes = $div_spell_node->content_list;
@@ -198,18 +199,36 @@ sub GetSpellData{
 
         $self->AddThreadMember($div_spell_node);
 
-        $self->{Thread}       .= $depth_text ."," . $spell_name      ."," . "|";
-        $self->{ThreadTg}     .= $depth_text ."," . $spell_name      ."," . "|";
-        $self->{ThreadOrig}   .= $depth_text ."," . $orig_spell_name ."," . "|";
-        $self->{ThreadOrigTg} .= $depth_text ."," . $orig_spell_name ."," . "|";
-        $self->{ThreadBase}   .= $depth_text ."," . $base_spell_name ."," . "|";
-        $self->{ThreadBaseTg} .= $depth_text ."," . $base_spell_name ."," . "|";
-        $depth += 1;
-        $self->{ThreadLength} += 1;
+        my $name = $div_spell_node->attr("name");
 
-        $self->{Datas}{BattleRanking}->CalcBattleRanking($self->{BattleType}, $self->{BattleNo}, $self->{PageNo}, $self->{Turn}, $self->{ThreadId}, $is_SSDL, $depth, $spell_name, $orig_spell_name, $base_spell_name, $div_SSDL_node);
+        my $skip_flag = 0;
+        my @child_nodes = $div_SSDL_node->content_list;
+
+        if ($child_nodes[0] =~ /HASH/) {
+            my @child_child_nodes = $child_nodes[0]->content_list;
+            if ($child_child_nodes[0] && $child_child_nodes[0] =~ /HASH/ &&
+                $child_child_nodes[0]->attr("class") && $child_child_nodes[0]->attr("class") eq "F1") {
+                # スペル発動直後のTG表記によってネストが二重にカウントされてしまうのを除外
+                $skip_flag = 1;
+            }
+        }
+
+        if (!$skip_flag) {
+            $self->{Thread}       .= $depth_text ."," . $spell_name      ."," . "|";
+            $self->{ThreadTg}     .= $depth_text ."," . $spell_name      ."," . "|";
+            $self->{ThreadOrig}   .= $depth_text ."," . $orig_spell_name ."," . "|";
+            $self->{ThreadOrigTg} .= $depth_text ."," . $orig_spell_name ."," . "|";
+            $self->{ThreadBase}   .= $depth_text ."," . $base_spell_name ."," . "|";
+            $self->{ThreadBaseTg} .= $depth_text ."," . $base_spell_name ."," . "|";
+            $depth += 1;
+            $self->{ThreadLength} += 1;
+
+            $self->{Datas}{BattleRanking}->CalcBattleRanking($self->{BattleType}, $self->{BattleNo}, $self->{PageNo}, $self->{Turn}, $self->{ThreadId}, $is_SSDL, $depth, $spell_name, $orig_spell_name, $base_spell_name, $div_SSDL_node);
+        }
+
+        $self->{LastSpellUser} = $name;
+        $self->{LastSpellName} = $spell_name;
     }
-
 
     my @child_nodes = $div_SSDL_node->content_list;
     my $start_depth = $depth;
@@ -226,7 +245,7 @@ sub GetSpellData{
 
                     my $tg_depth_text = "";
                     for (my $i=0;$i<$start_depth;$i++) {
-                        $tg_depth_text .= "<"
+                        $tg_depth_text .= "<";
                     }
 
                     my $tg_text = $tgdl_child_node->as_text;

@@ -100,6 +100,7 @@ sub InitRankingData{
         "TotalNamedDamage",
         "TotalThunderDamage",
         "SpellMaxDamage",
+        "TurnMaxDamage",
         "TotalHpHeal",
         "TotalSpHeal",
         "TotalCpHeal",
@@ -118,8 +119,11 @@ sub InitRankingData{
             "PageNo" => $page_no,
             "Turn" => 0,
             "ThreadId" => 0,
+            "AbnormalType" => 0,
         }
     }
+    $self->{BattleRanking}{$p_no_name}{$battle_type}{"TurnMaxDamage"}{"TurnDamages"} = {};
+    $self->{BattleRanking}{$p_no_name}{$battle_type}{"TotalAbnormal"}{"Abnormals"} = {};
 }
 #-----------------------------------#
 #    レイドの戦闘URL情報を1ターン目の結果で初期化
@@ -197,8 +201,10 @@ sub CalcBattleRanking{
     my $spellTotalDamage = 0;
 
     $self->{Check} = $orig_spell_name;
+    #if ($self->{Check} ne "水カウンターボム") {print "$spell_name\n";}
+    if ($self->{Check} eq "水カウンターボム") {print "ダメージは？\n";}
 
-    $self->AddTotalValues(\@child_nodes, $p_no_name, $name, $spell_name, $battle_type, $spellTotalDamage);
+    $spellTotalDamage = $self->AddTotalValues(\@child_nodes, $p_no_name, $name, $spell_name, $battle_type, $spellTotalDamage);
 
     if ($self->{BattleRanking}{$p_no_name}{$battle_type}{"SpellMaxDamage"}{"Value"} < $spellTotalDamage) {
         $self->{BattleRanking}{$p_no_name}{$battle_type}{"SpellMaxDamage"}{"Value"} = $spellTotalDamage;
@@ -207,8 +213,11 @@ sub CalcBattleRanking{
         $self->{BattleRanking}{$p_no_name}{$battle_type}{"SpellMaxDamage"}{"Turn"} = $turn;
         $self->{BattleRanking}{$p_no_name}{$battle_type}{"SpellMaxDamage"}{"ThreadId"} = $thread_id;
     }
+    $self->{BattleRanking}{$p_no_name}{$battle_type}{"TurnMaxDamage"}{"TurnDamages"}{$turn}{"Damage"} += $spellTotalDamage;
+    $self->{BattleRanking}{$p_no_name}{$battle_type}{"TurnMaxDamage"}{"TurnDamages"}{$turn}{"BattleNo"} = $battle_no;
+    $self->{BattleRanking}{$p_no_name}{$battle_type}{"TurnMaxDamage"}{"TurnDamages"}{$turn}{"PageNo"} = $page_no;
 
-    if ($depth == 0) {
+    if ($depth == 1) {
         $self->{BattleRanking}{$p_no_name}{$battle_type}{"TotalAction"}{"Value"} += 1;
 
     } else {
@@ -237,13 +246,16 @@ sub AddTotalValues{
         if ($child_node =~ /HASH/ && $child_node->attr("spell")) {
             if ($spell_name ne $child_node->attr("spell") || $name ne $child_node->attr("name")) {
                 # スキル表記と実際のダメージ表記までの入れ子設定が状況により大きく変わるため、他のスペル名のノードが出現するまで再帰処理を行う
+                # if ($self->{Check} eq "水カウンターボム") {print $child_node->attr("spell") . "なので戻るよ\n";}
                 return $spellTotalDamage;
             }
         }
 
         if ($child_node =~ /HASH/ && $child_node->attr("name") && ($child_node->attr("name") eq "SSDL" || $child_node->attr("name") eq "TGDL")) {
+            # if ($self->{Check} eq "水カウンターボム") {print $child_node->attr("name")." に入るよ\n";}
+
             my @child_child_nodes = $child_node->content_list;
-            $self->AddTotalValues(\@child_child_nodes, $p_no_name, $name, $spell_name, $battle_type, $spellTotalDamage);
+            $spellTotalDamage = $self->AddTotalValues(\@child_child_nodes, $p_no_name, $name, $spell_name, $battle_type, $spellTotalDamage);
         }
 
         if ($child_node =~ /HASH/ && $child_node->attr("name") && $child_node->attr("name") eq "Damage") {
@@ -252,6 +264,7 @@ sub AddTotalValues{
                 my $damage = $2;
                 $spellTotalDamage += $damage;
                 $self->{BattleRanking}{$p_no_name}{$battle_type}{"TotalDamage"}{"Value"} += $damage;
+                if ($p_no_name eq "913<>エルナ"){ print $damage."\n";}
                 if($target_name =~ /岩嵐のジャノン/) {
                     $self->{BattleRanking}{$p_no_name}{$battle_type}{"TotalBossDamage"}{"Value"} += $damage;
 
@@ -279,9 +292,13 @@ sub AddTotalValues{
                 $self->{BattleRanking}{$p_no_name}{$battle_type}{$$healToKey{$1}}{"Value"} += $2;
             }
 
-            if ($child_node->as_text =~ /に【(.+?)】を (\d+) 追加した！/) {
-                my $abnormal_name = $1;
-                $self->{BattleRanking}{$p_no_name}{$battle_type}{"TotalAbnormal"}{"Value"} += $2;
+            if ($child_node->as_text =~ /(.+?)に【(.+?)】を (\d+) 追加した！/) {
+                my $target_name = $1;
+                my $abnormal_type = $self->{CommonDatas}{ProperName}->GetOrAddId($2);
+                if (!($name eq $target_name && "麻痺" eq $2)) { # 自分への麻痺デメリットを除外
+                    $self->{BattleRanking}{$p_no_name}{$battle_type}{"TotalAbnormal"}{"Value"} += $3;
+                    $self->{BattleRanking}{$p_no_name}{$battle_type}{"TotalAbnormal"}{"Abnormals"}{$abnormal_type} += $3;
+                }
             }
         }
 
@@ -309,19 +326,24 @@ sub OutputRankingData{
         "TotalNamedDamage" => 2,
         "TotalThunderDamage" => 3,
         "SpellMaxDamage" => 4,
-        "TotalHpHeal" => 5,
-        "TotalSpHeal" => 6,
-        "TotalCpHeal" => 7,
-        "SpellMaxHpHeal" => 8,
-        "SpellMaxSpHeal" => 9,
-        "TotalSummon" => 10,
-        "TotalAbnormal" => 11,
-        "TotalAction" => 12,
-        "TotalCounter" => 13,
+        "TurnMaxDamage" => 5,
+        "TotalHpHeal" => 6,
+        "TotalSpHeal" => 7,
+        "TotalCpHeal" => 8,
+        "SpellMaxHpHeal" => 9,
+        "SpellMaxSpHeal" => 10,
+        "TotalSummon" => 11,
+        "TotalAbnormal" => 12,
+        "TotalAction" => 13,
+        "TotalCounter" => 14,
     };
 
     foreach my $p_no_name ( sort { $a cmp $b } keys %{ $self->{BattleRanking} } ) {
         foreach my $battle_type ( sort { $a cmp $b } keys %{ $self->{BattleRanking}{$p_no_name} } ) {
+
+            $self->MakeTurnMaxDamage($self->{BattleRanking}{$p_no_name}{$battle_type}{"TurnMaxDamage"});
+            $self->MakeMaxAbnormalType($self->{BattleRanking}{$p_no_name}{$battle_type}{"TotalAbnormal"});
+
             foreach my $ranking_type_name ( sort { $a cmp $b } keys %{ $self->{BattleRanking}{$p_no_name}{$battle_type} } ) {
                 my $ranking_type_id = $$ranking_type_name_to_id{$ranking_type_name};
                 my @split_p_no_name = split(/<>/, $p_no_name);
@@ -332,9 +354,46 @@ sub OutputRankingData{
                                                                     $p_no, $name,
                                                                     $ranking_type_id,
                                                                     $$ranking_data{"Value"},
-                                                                    $battle_type, $$ranking_data{"BattleNo"}, $$ranking_data{"PageNo"}, $$ranking_data{"Turn"}, $$ranking_data{"ThreadId"}, 0,
+                                                                    $battle_type, $$ranking_data{"BattleNo"}, $$ranking_data{"PageNo"}, $$ranking_data{"Turn"}, $$ranking_data{"ThreadId"}, $$ranking_data{"AbnormalType"},
                                                                     ) ));
             }
+        }
+    }
+}
+
+#-----------------------------------#
+#    ランキングデータを出力データに追加
+#------------------------------------
+#    引数｜
+#-----------------------------------#
+sub MakeTurnMaxDamage{
+    my $self = shift;
+    my $ranking_data = shift;
+
+    foreach my $turn ( sort { $a <=> $b } keys %{ $$ranking_data{"TurnDamages"} } ) {
+        if ($$ranking_data{"Value"} < $$ranking_data{"TurnDamages"}{$turn}{"Damage"}) {
+            $$ranking_data{"Value"} = $$ranking_data{"TurnDamages"}{$turn}{"Damage"};
+            $$ranking_data{"BattleNo"} = $$ranking_data{"TurnDamages"}{$turn}{"BattleNo"};
+            $$ranking_data{"PageNo"} = $$ranking_data{"TurnDamages"}{$turn}{"PageNo"};
+            $$ranking_data{"Turn"} = $turn;
+        }
+    }
+}
+
+#-----------------------------------#
+#    ランキングデータを出力データに追加
+#------------------------------------
+#    引数｜
+#-----------------------------------#
+sub MakeMaxAbnormalType{
+    my $self = shift;
+    my $ranking_data = shift;
+
+    my $max_value = 0;
+    foreach my $abnormal_type ( sort { $a <=> $b } keys %{ $$ranking_data{"Abnormals"} } ) {
+        if ($max_value < $$ranking_data{"Abnormals"}{$abnormal_type}) {
+            $max_value = $$ranking_data{"Abnormals"}{$abnormal_type};
+            $$ranking_data{"AbnormalType"} = $abnormal_type;
         }
     }
 }

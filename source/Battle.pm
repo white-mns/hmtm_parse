@@ -69,7 +69,6 @@ sub Init{
 sub Execute{
     my $self        = shift;
 
-
     my @battle_directories = ('b','prc','rank','pk');
     # @battle_directories = ('prc');
     foreach my $battle_directory (@battle_directories) {
