@@ -110,6 +110,7 @@ sub InitRankingData{
         "TotalAbnormal",
         "TotalAction",
         "TotalCounter",
+        "MaxDamage",
     ];
 
     foreach my $ranking_type_key (@$ranking_type_keys) {
@@ -202,7 +203,7 @@ sub CalcBattleRanking{
 
     $self->{Check} = $orig_spell_name;
 
-    $spellTotalDamage = $self->AddTotalValues(\@child_nodes, $p_no_name, $name, $spell_name, $battle_type, $spellTotalDamage);
+    $spellTotalDamage = $self->AddTotalValues(\@child_nodes, $p_no_name, $name, $spell_name, $battle_type, $battle_no, $page_no, $turn, $thread_id, $spellTotalDamage);
 
     if ($self->{BattleRanking}{$p_no_name}{$battle_type}{"SpellMaxDamage"}{"Value"} < $spellTotalDamage) {
         $self->{BattleRanking}{$p_no_name}{$battle_type}{"SpellMaxDamage"}{"Value"} = $spellTotalDamage;
@@ -238,6 +239,10 @@ sub AddTotalValues{
     my $name = shift;
     my $spell_name = shift;
     my $battle_type = shift;
+    my $battle_no = shift;
+    my $page_no = shift;
+    my $turn = shift;
+    my $thread_id = shift;
     my $spellTotalDamage = shift;
 
     foreach my $child_node (@$child_nodes) {
@@ -251,7 +256,7 @@ sub AddTotalValues{
         if ($child_node =~ /HASH/ && $child_node->attr("name") && ($child_node->attr("name") eq "SSDL" || $child_node->attr("name") eq "TGDL")) {
 
             my @child_child_nodes = $child_node->content_list;
-            $spellTotalDamage = $self->AddTotalValues(\@child_child_nodes, $p_no_name, $name, $spell_name, $battle_type, $spellTotalDamage);
+            $spellTotalDamage = $self->AddTotalValues(\@child_child_nodes, $p_no_name, $name, $spell_name, $battle_type, $battle_no, $page_no, $turn, $thread_id, $spellTotalDamage);
         }
 
         if ($child_node =~ /HASH/ && $child_node->attr("name") && $child_node->attr("name") eq "Damage") {
@@ -267,6 +272,14 @@ sub AddTotalValues{
                 if($target_name =~ /(岩嵐のジャノン|ジャック|岩嵐部隊長)/) {
                     $self->{BattleRanking}{$p_no_name}{$battle_type}{"TotalNamedDamage"}{"Value"} += $damage;
 
+                }
+
+                if ($self->{BattleRanking}{$p_no_name}{$battle_type}{"MaxDamage"}{"Value"} < $damage) {
+                    $self->{BattleRanking}{$p_no_name}{$battle_type}{"MaxDamage"}{"Value"} = $damage;
+                    $self->{BattleRanking}{$p_no_name}{$battle_type}{"MaxDamage"}{"BattleNo"} = $battle_no;
+                    $self->{BattleRanking}{$p_no_name}{$battle_type}{"MaxDamage"}{"PageNo"} = $page_no;
+                    $self->{BattleRanking}{$p_no_name}{$battle_type}{"MaxDamage"}{"Turn"} = $turn;
+                    $self->{BattleRanking}{$p_no_name}{$battle_type}{"MaxDamage"}{"ThreadId"} = $thread_id;
                 }
             }
 
@@ -331,6 +344,7 @@ sub OutputRankingData{
         "TotalAbnormal" => 12,
         "TotalAction" => 13,
         "TotalCounter" => 14,
+        "MaxDamage" => 15,
     };
 
     foreach my $p_no_name ( sort { $a cmp $b } keys %{ $self->{BattleRanking} } ) {
