@@ -162,16 +162,37 @@ sub GetSpellData{
 
     my $div_spell_node = ($$div_normalspell_nodes[0] && $$div_normalspell_nodes[0] =~ /HASH/) ? $$div_normalspell_nodes[0] : $$div_syncspell_nodes[0];
 
-    if ($is_SSDL && $div_SSDL_node->attr("class") eq "id1" && $div_spell_node && $div_spell_node =~ /HASH/) {
+    if ($is_SSDL && $div_spell_node && $div_spell_node =~ /HASH/) {
         my ($spell_name, $orig_spell_name, $base_spell_name, $depth_text) = ("", "", "", "");
 
         my @spell_child_nodes = $div_spell_node->content_list;
 
         if (scalar(@spell_child_nodes) <= 1) {
+            my $parent_node = $div_spell_node->parent;
+            my @parent_child = $parent_node->content_list;
             if ($div_spell_node->attr("spell") && $div_spell_node->attr("spell") eq "通常攻撃") {
                 $spell_name = "通常攻撃";
                 $orig_spell_name = $spell_name;
                 $base_spell_name = $spell_name;
+
+            } elsif ($parent_child[5] && $div_spell_node == $parent_child[5]) {
+                # 演出画像のある合成魔法がネストされない現象に対応
+                $spell_name = $parent_child[7]->as_text;
+                $spell_name =~ s/！$//;
+
+                $orig_spell_name = $parent_child[8]->as_text;
+                $orig_spell_name =~ s/[ ]*No.[F]*\d+-\d //;
+                $orig_spell_name =~ s/必殺魔法！ //;
+
+                if (exists($self->{CommonDatas}{NameToBaseSpell}{$orig_spell_name})) {
+                    $base_spell_name = $self->{CommonDatas}{NameToBaseSpell}{$orig_spell_name};
+
+                } else {
+                    $base_spell_name = "？";
+                }
+                if (!$spell_name) {
+                    return $depth;
+                }
 
             } else {
                 return $depth;
@@ -211,9 +232,13 @@ sub GetSpellData{
                 # スペル発動直後のTG表記によってネストが二重にカウントされてしまうのを除外
                 $skip_flag = 1;
             }
+            if ($child_nodes[0]->attr("name") && $child_nodes[0]->attr("name") eq "SSDL") {
+                # 二重のネストによって二重にカウントされてしまうのを除外
+                $skip_flag = 1;
+            }
         }
 
-        if (!$skip_flag) {
+        if (!$skip_flag && !($self->{LastSpellUser} eq $name && $self->{LastSpellName} eq $spell_name)) {
             $self->{Thread}       .= $depth_text ."," . $spell_name      ."," . "|";
             $self->{ThreadTg}     .= $depth_text ."," . $spell_name      ."," . "|";
             $self->{ThreadOrig}   .= $depth_text ."," . $orig_spell_name ."," . "|";
@@ -224,10 +249,11 @@ sub GetSpellData{
             $self->{ThreadLength} += 1;
 
             $self->{Datas}{BattleRanking}->CalcBattleRanking($self->{BattleType}, $self->{BattleNo}, $self->{PageNo}, $self->{Turn}, $self->{ThreadId}, $is_SSDL, $depth, $spell_name, $orig_spell_name, $base_spell_name, $div_SSDL_node);
+
+            $self->{LastSpellUser} = $name;
+            $self->{LastSpellName} = $spell_name;
         }
 
-        $self->{LastSpellUser} = $name;
-        $self->{LastSpellName} = $spell_name;
     }
 
     my @child_nodes = $div_SSDL_node->content_list;

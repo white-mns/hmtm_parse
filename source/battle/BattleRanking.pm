@@ -201,8 +201,6 @@ sub CalcBattleRanking{
     my $spellTotalDamage = 0;
 
     $self->{Check} = $orig_spell_name;
-    #if ($self->{Check} ne "水カウンターボム") {print "$spell_name\n";}
-    if ($self->{Check} eq "水カウンターボム") {print "ダメージは？\n";}
 
     $spellTotalDamage = $self->AddTotalValues(\@child_nodes, $p_no_name, $name, $spell_name, $battle_type, $spellTotalDamage);
 
@@ -246,13 +244,11 @@ sub AddTotalValues{
         if ($child_node =~ /HASH/ && $child_node->attr("spell")) {
             if ($spell_name ne $child_node->attr("spell") || $name ne $child_node->attr("name")) {
                 # スキル表記と実際のダメージ表記までの入れ子設定が状況により大きく変わるため、他のスペル名のノードが出現するまで再帰処理を行う
-                # if ($self->{Check} eq "水カウンターボム") {print $child_node->attr("spell") . "なので戻るよ\n";}
                 return $spellTotalDamage;
             }
         }
 
         if ($child_node =~ /HASH/ && $child_node->attr("name") && ($child_node->attr("name") eq "SSDL" || $child_node->attr("name") eq "TGDL")) {
-            # if ($self->{Check} eq "水カウンターボム") {print $child_node->attr("name")." に入るよ\n";}
 
             my @child_child_nodes = $child_node->content_list;
             $spellTotalDamage = $self->AddTotalValues(\@child_child_nodes, $p_no_name, $name, $spell_name, $battle_type, $spellTotalDamage);
@@ -264,7 +260,6 @@ sub AddTotalValues{
                 my $damage = $2;
                 $spellTotalDamage += $damage;
                 $self->{BattleRanking}{$p_no_name}{$battle_type}{"TotalDamage"}{"Value"} += $damage;
-                if ($p_no_name eq "913<>エルナ"){ print $damage."\n";}
                 if($target_name =~ /岩嵐のジャノン/) {
                     $self->{BattleRanking}{$p_no_name}{$battle_type}{"TotalBossDamage"}{"Value"} += $damage;
 
