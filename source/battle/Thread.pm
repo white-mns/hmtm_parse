@@ -156,6 +156,7 @@ sub GetSpellData{
     my $is_SSDL = shift;
     my $depth = shift;
     my $div_SSDL_node = shift;
+    my $is_aria = 0;
 
     my $div_normalspell_nodes = &GetNode::GetNode_Tag_Attr_RegExp("div", "spell", ".", \$div_SSDL_node);
     my $div_syncspell_nodes   = &GetNode::GetNode_Tag_Attr_RegExp("div", "syncspell", ".", \$div_SSDL_node);
@@ -166,6 +167,7 @@ sub GetSpellData{
         my ($spell_name, $orig_spell_name, $base_spell_name, $depth_text) = ("", "", "", "");
 
         my @spell_child_nodes = $div_spell_node->content_list;
+        my $left_node = $div_SSDL_node->left;
 
         if (scalar(@spell_child_nodes) <= 1) {
             my $parent_node = $div_spell_node->parent;
@@ -198,6 +200,12 @@ sub GetSpellData{
                 return $depth;
 
             }
+        } elsif ($left_node && $left_node =~ /HASH/ && $left_node->attr("name") && $left_node->attr("name") eq "Aria")  {
+            $is_aria = 1;
+            $spell_name = "詠唱";
+            $orig_spell_name = "詠唱";
+            $base_spell_name = "詠唱";
+
         } else {
             $spell_name = $spell_child_nodes[0]->as_text;
             $spell_name =~ s/！$//;
@@ -223,6 +231,19 @@ sub GetSpellData{
         my $name = $div_spell_node->attr("name");
 
         my $skip_flag = 0;
+
+        # 詠唱使用者を特定
+        if ($is_aria) {
+            my @left_childs = $left_node->content_list;
+            if ($left_childs[0] =~ /HASH/) {
+                $name = $left_childs[0]->as_text;
+
+            } else {
+                $is_aria = 0;
+                $skip_flag = 1;
+            }
+        }
+
         my @child_nodes = $div_SSDL_node->content_list;
 
         if ($child_nodes[0] =~ /HASH/) {
@@ -241,6 +262,10 @@ sub GetSpellData{
                 # 二重のネストによって二重にカウントされてしまうのを除外
                 $skip_flag = 1;
             }
+        }
+
+        if ($is_aria) {
+            $skip_flag = 0;
         }
 
         if (!$skip_flag && !($self->{LastSpellUser} eq $name && $self->{LastSpellName} eq $spell_name)) {
@@ -352,8 +377,8 @@ sub BattleStart{
 
     $self->{ThreadId} = 0;
     $self->{ActId} = 0;
-    $self->{NicknameToEno}  = {};
-    $self->{NicknameToEnemyId} = {};
+
+    $self->{Datas}{BattleRanking}->BattleStart($self->{PageNo});
 }
 
 #-----------------------------------#

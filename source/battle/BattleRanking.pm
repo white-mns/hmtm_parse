@@ -187,9 +187,6 @@ sub CalcBattleRanking{
     my $base_spell_name = shift;
     my $div_SSDL_node = shift;
 
-    my $left_node = $div_SSDL_node->left;
-    if ($left_node && $left_node =~ /HASH/ && $left_node->attr("name") && $left_node->attr("name") eq "Aria") {return;} #詠唱を除外
-
     my $div_normalspell_nodes = &GetNode::GetNode_Tag_Attr_RegExp("div", "spell", ".", \$div_SSDL_node);
     my $div_syncspell_nodes   = &GetNode::GetNode_Tag_Attr_RegExp("div", "syncspell", ".", \$div_SSDL_node);
 
@@ -198,6 +195,23 @@ sub CalcBattleRanking{
     my $name = $div_spell_node->attr("name");
     my $p_no = $div_spell_node->attr("pno");
     my $p_no_name = "$p_no<>$name";
+
+    $self->{NicknameToPno}{$name} = $p_no;
+
+    my $left_node = $div_SSDL_node->left;
+    if ($left_node && $left_node =~ /HASH/ && $left_node->attr("name") && $left_node->attr("name") eq "Aria") {
+
+        my @left_childs = $left_node->content_list;
+        if ($left_childs[0] =~ /HASH/) {
+            $name = $left_childs[0]->as_text;
+            $p_no = $self->{NicknameToPno}{$name};
+            if (!$p_no) {
+                print "詠唱特定不可！ $name, $battle_type, $battle_no, $page_no\n";
+                return;
+            }
+            $p_no_name = "$p_no<>$name";
+        }
+    }
 
     $self->InitRankingData($p_no_name, $battle_type, $battle_no, $page_no);
     $self->InitRaidPage($p_no_name, $battle_type, $battle_no, $page_no);
@@ -327,6 +341,21 @@ sub AddTotalValues{
     }
 
     return $spellTotalDamage;
+}
+
+#-----------------------------------#
+#    戦闘開始時・相性の紐づけをリセット
+#------------------------------------
+#    引数｜
+#-----------------------------------#
+sub BattleStart{
+    my $self = shift;
+    my $page_no= shift;
+
+    if ($page_no <= 1) {
+        # ページをまたいで詠唱完了することがあるため、レイド戦の2ページ目以降はリセットしない
+        $self->{NicknameToPno}  = {};
+    }
 }
 
 #-----------------------------------#
