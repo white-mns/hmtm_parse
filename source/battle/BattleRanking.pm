@@ -58,6 +58,9 @@ sub Init{
         "turn",
         "thread_id",
         "abnormal_type",
+        "spell_name",
+        "orig_spell_name",
+        "base_spell_name",
     ];
 
     $self->{Datas}{BattleRanking}->Init($header_list);
@@ -122,6 +125,9 @@ sub InitRankingData{
             "Turn" => 0,
             "ThreadId" => 0,
             "AbnormalType" => 0,
+            "SpellName" => "",
+            "OrigSpellName" => "",
+            "BaseSpellName" => "",
         }
     }
     $self->{BattleRanking}{$p_no_name}{$battle_type}{"TurnMaxDamage"}{"TurnDamages"} = {};
@@ -222,7 +228,7 @@ sub CalcBattleRanking{
 
     $self->{Check} = $orig_spell_name;
 
-    $spellTotalDamage = $self->AddTotalValues(\@child_nodes, $p_no_name, $name, $spell_name, $battle_type, $battle_no, $page_no, $turn, $thread_id, $spellTotalDamage);
+    $spellTotalDamage = $self->AddTotalValues(\@child_nodes, $p_no_name, $name, $spell_name, $orig_spell_name, $base_spell_name, $battle_type, $battle_no, $page_no, $turn, $thread_id, $spellTotalDamage);
 
     if ($self->{BattleRanking}{$p_no_name}{$battle_type}{"SpellMaxDamage"}{"Value"} < $spellTotalDamage) {
         $self->{BattleRanking}{$p_no_name}{$battle_type}{"SpellMaxDamage"}{"Value"} = $spellTotalDamage;
@@ -230,6 +236,9 @@ sub CalcBattleRanking{
         $self->{BattleRanking}{$p_no_name}{$battle_type}{"SpellMaxDamage"}{"PageNo"} = $page_no;
         $self->{BattleRanking}{$p_no_name}{$battle_type}{"SpellMaxDamage"}{"Turn"} = $turn;
         $self->{BattleRanking}{$p_no_name}{$battle_type}{"SpellMaxDamage"}{"ThreadId"} = $thread_id;
+        $self->{BattleRanking}{$p_no_name}{$battle_type}{"SpellMaxDamage"}{"SpellName"} = $spell_name;
+        $self->{BattleRanking}{$p_no_name}{$battle_type}{"SpellMaxDamage"}{"OrigSpellName"} = $orig_spell_name;
+        $self->{BattleRanking}{$p_no_name}{$battle_type}{"SpellMaxDamage"}{"BaseSpellName"} = $base_spell_name;
     }
     $self->{BattleRanking}{$p_no_name}{$battle_type}{"TurnMaxDamage"}{"TurnDamages"}{$turn}{"Damage"} += $spellTotalDamage;
     $self->{BattleRanking}{$p_no_name}{$battle_type}{"TurnMaxDamage"}{"TurnDamages"}{$turn}{"BattleNo"} = $battle_no;
@@ -257,6 +266,8 @@ sub AddTotalValues{
     my $p_no_name = shift;
     my $name = shift;
     my $spell_name = shift;
+    my $orig_spell_name = shift;
+    my $base_spell_name = shift;
     my $battle_type = shift;
     my $battle_no = shift;
     my $page_no = shift;
@@ -275,7 +286,7 @@ sub AddTotalValues{
         if ($child_node =~ /HASH/ && $child_node->attr("name") && ($child_node->attr("name") eq "SSDL" || $child_node->attr("name") eq "TGDL")) {
 
             my @child_child_nodes = $child_node->content_list;
-            $spellTotalDamage = $self->AddTotalValues(\@child_child_nodes, $p_no_name, $name, $spell_name, $battle_type, $battle_no, $page_no, $turn, $thread_id, $spellTotalDamage);
+            $spellTotalDamage = $self->AddTotalValues(\@child_child_nodes, $p_no_name, $name, $spell_name, $orig_spell_name, $base_spell_name, $battle_type, $battle_no, $page_no, $turn, $thread_id, $spellTotalDamage);
         }
 
         if ($child_node =~ /HASH/ && $child_node->attr("name") && $child_node->attr("name") eq "Damage") {
@@ -303,6 +314,9 @@ sub AddTotalValues{
                     $self->{BattleRanking}{$p_no_name}{$battle_type}{"MaxDamage"}{"PageNo"} = $page_no;
                     $self->{BattleRanking}{$p_no_name}{$battle_type}{"MaxDamage"}{"Turn"} = $turn;
                     $self->{BattleRanking}{$p_no_name}{$battle_type}{"MaxDamage"}{"ThreadId"} = $thread_id;
+                    $self->{BattleRanking}{$p_no_name}{$battle_type}{"MaxDamage"}{"SpellName"} = $spell_name;
+                    $self->{BattleRanking}{$p_no_name}{$battle_type}{"MaxDamage"}{"OrigSpellName"} = $orig_spell_name;
+                    $self->{BattleRanking}{$p_no_name}{$battle_type}{"MaxDamage"}{"BaseSpellName"} = $base_spell_name;
                 }
             }
 
@@ -402,7 +416,9 @@ sub OutputRankingData{
                                                                     $p_no, $name,
                                                                     $ranking_type_id,
                                                                     $$ranking_data{"Value"},
-                                                                    $battle_type, $$ranking_data{"BattleNo"}, $$ranking_data{"PageNo"}, $$ranking_data{"Turn"}, $$ranking_data{"ThreadId"}, $$ranking_data{"AbnormalType"},
+                                                                    $battle_type, $$ranking_data{"BattleNo"}, $$ranking_data{"PageNo"}, $$ranking_data{"Turn"}, $$ranking_data{"ThreadId"},
+                                                                    $$ranking_data{"AbnormalType"},
+                                                                    $$ranking_data{"SpellName"}, $$ranking_data{"OrigSpellName"}, $$ranking_data{"BaseSpellName"},
                                                                     ) ));
             }
         }
