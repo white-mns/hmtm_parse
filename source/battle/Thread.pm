@@ -226,11 +226,16 @@ sub GetSpellData{
         my @child_nodes = $div_SSDL_node->content_list;
 
         if ($child_nodes[0] =~ /HASH/) {
-            my @child_child_nodes = $child_nodes[0]->content_list;
-            if ($child_child_nodes[0] && $child_child_nodes[0] =~ /HASH/ &&
-                $child_child_nodes[0]->attr("class") && $child_child_nodes[0]->attr("class") eq "F1") {
-                # スペル発動直後のTG表記によってネストが二重にカウントされてしまうのを除外
-                $skip_flag = 1;
+            foreach my $child_node (@child_nodes) {
+                if ($child_node =~ /HASH/ && $child_node->attr("name") && $child_node->attr("name") =~ /..DL/) {
+                    my @child_child_nodes = $child_node->content_list;
+                    if ($child_child_nodes[0] && $child_child_nodes[0] =~ /HASH/ &&
+                        $child_child_nodes[0]->attr("class") && $child_child_nodes[0]->attr("class") eq "F1") {
+                        # スペル発動直後のTG表記によってスペルが二重にカウントされたり他のスペルの結果を取得してしまうのを除外
+                        $skip_flag = 1;
+                    }
+                }
+
             }
             if ($child_nodes[0]->attr("name") && $child_nodes[0]->attr("name") eq "SSDL") {
                 # 二重のネストによって二重にカウントされてしまうのを除外
