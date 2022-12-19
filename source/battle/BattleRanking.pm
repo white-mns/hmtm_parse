@@ -185,6 +185,9 @@ sub CalcBattleRanking{
     my $base_spell_name = shift;
     my $div_SSDL_node = shift;
 
+    my $left_node = $div_SSDL_node->left;
+    if ($left_node && $left_node =~ /HASH/ && $left_node->attr("name") && $left_node->attr("name") eq "Aria") {return;} #詠唱を除外
+
     my $div_normalspell_nodes = &GetNode::GetNode_Tag_Attr_RegExp("div", "spell", ".", \$div_SSDL_node);
     my $div_syncspell_nodes   = &GetNode::GetNode_Tag_Attr_RegExp("div", "syncspell", ".", \$div_SSDL_node);
 
