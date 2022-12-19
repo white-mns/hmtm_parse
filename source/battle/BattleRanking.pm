@@ -111,6 +111,7 @@ sub InitRankingData{
         "TotalAction",
         "TotalCounter",
         "MaxDamage",
+        "TotalNoBarrierDamage",
     ];
 
     foreach my $ranking_type_key (@$ranking_type_keys) {
@@ -157,6 +158,7 @@ sub InitRaidPage{
         "TotalAbnormal",
         "TotalAction",
         "TotalCounter",
+        "TotalNoBarrierDamage",
     ];
 
     foreach my $ranking_type_key (@$ranking_type_keys) {
@@ -276,6 +278,10 @@ sub AddTotalValues{
                     $self->{BattleRanking}{$p_no_name}{$battle_type}{"TotalNamedDamage"}{"Value"} += $damage;
 
                 }
+                if($target_name !~ /障壁/) {
+                    $self->{BattleRanking}{$p_no_name}{$battle_type}{"TotalNoBarrierDamage"}{"Value"} += $damage;
+
+                }
 
                 if ($self->{BattleRanking}{$p_no_name}{$battle_type}{"MaxDamage"}{"Value"} < $damage) {
                     $self->{BattleRanking}{$p_no_name}{$battle_type}{"MaxDamage"}{"Value"} = $damage;
@@ -348,6 +354,7 @@ sub OutputRankingData{
         "TotalAction" => 13,
         "TotalCounter" => 14,
         "MaxDamage" => 15,
+        "TotalNoBarrierDamage" => 16
     };
 
     foreach my $p_no_name ( sort { $a cmp $b } keys %{ $self->{BattleRanking} } ) {
